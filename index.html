@@ -468,7 +468,7 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
 <script>
 /* ================= 설정 ================= */
 // Google Sheets 연동: Apps Script 웹 앱 배포 URL을 넣으세요. 비워 두면 이 브라우저에만 저장되는 미리보기 모드로 동작합니다.
-const API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnS-vJIyQLSDYKaTtwwbaGK4VcupPoWhAihM1JBTen_WSX0TSoz8D_zRNZ_J3tV2qprhAjxJbK9Zq9CxjEIEkwq4HqFbPj0Y6GsrJxZIlLPv8YSUHF-5cJzyQeklopWRQl0SOx_1TbMIxzlzRL6FVPyTywwdplukqGlpFl2etmyBbZ4WYii4DD7jbwyuT2b2ujJfHDDyxzgveQO2bs1O5vOXOscjBXp_540RWnPhTxj-_zXbYaxMdOeBPD-AQc7xyvGemU9xkPNc0eHIE28FtXhaqxn0UH49hT_9ruUd&lib=MPDjr8hKlOxFnig5GcVIyhSJWY7JBlX_n';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyHjUL-Ps0mUNi20Yk_5lqzv8xkAQ8X8KTALO7sYMmWNFY3S10UQaGEzPeofV8sZcLrMg/exec';
 // 관리자 비밀번호는 이 파일에 두지 않습니다 — Google Sheets 서버(Code.gs)에서만 확인합니다.
 // (API_URL이 비어 있는 미리보기 모드에서는 관리자 로그인이 되지 않습니다)
 const LOCAL_ADMIN_PW = '';
@@ -586,6 +586,11 @@ const calData = () => isAdmin ? ADM.filter(r => r.status !== 'rejected') : PUB;
 const onDate = ds => calData().filter(r => r.date === ds).sort((a,b) => a.start - b.start);
 
 async function refresh(){
+  if (API_URL && !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL)){
+    popup({ type:'warn', title:'API_URL 주소가 올바르지 않습니다',
+      msg:'Apps Script → 배포 → 배포 관리에서 보이는\n"https://script.google.com/macros/s/…/exec" 주소를 넣어 주세요.' });
+    applyAdmin(); renderCal(); renderAdmin(); return;
+  }
   try {
     const r = await backend.list();
     if (!r.ok) throw new Error(r.error || 'list failed');
