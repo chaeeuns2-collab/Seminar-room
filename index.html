@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인공지능응용학과 세미나실 예약</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap">
+<style>
+:root{
+  --page:#f5f3f1; --bg:#fbfaf8; --card:#ffffff; --ink:#141519; --ink-2:#2b2d33; --muted:#71757d; --line:#eee8e4;
+  --pink:#f4a3b8; --pink-soft:#fdecf1; --rose:#d9637f; --rose-ink:#a8455f;
+  --aqua:#57cbd8; --aqua-soft:#e2f6f8; --sea:#2aa3bd;
+  /* 달력 시간대: 오전 → 저녁으로 갈수록 진해지는 파스텔 핑크 */
+  --am-a:#fff4f7; --am-b:#ffe6ee;
+  --pm-a:#fde0e9; --pm-b:#fbcbda;
+  --eve-a:#f9c3d3; --eve-b:#f4a6be;
+  /* 승인대기: 연한 하늘색 */
+  --wait-a:#eef8fe; --wait-b:#d9effc; --wait-ink:#2f7fae;
+  --coral:#F29191;
+  --red:#e0344f;
+  --radius:24px; --shadow:0 1px 2px rgba(20,21,25,.04),0 10px 30px rgba(20,21,25,.05);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--page);color:var(--ink);font-family:"SUIT Variable",SUIT,"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.015em;overflow-x:hidden;word-break:keep-all}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+[hidden]{display:none!important}
+
+/* ---------- 둥근 박스 + 핑크 그라데이션 그림자 ---------- */
+.glow{position:relative}
+.glow::before{content:"";position:absolute;inset:26px 4% -18px;z-index:0;border-radius:40px;background:linear-gradient(115deg,#ffc6d5 0%,#f7a4bd 35%,#ffd3df 60%,#ffb8cb 80%,#fbd0dc 100%);filter:blur(34px);opacity:.85;pointer-events:none}
+.glow > .box{position:relative;z-index:1}
+
+/* ---------- hero frame ---------- */
+.frame-outer{max-width:1180px;margin:22px auto 0;padding:0 16px}
+.frame{border-radius:34px;overflow:hidden;border:1px solid rgba(255,255,255,.9);
+  background:linear-gradient(180deg,#ffffff 0%,#ffffff 52%,#fff4f3 60%,#fbdcdb 70%,#f7b9b8 82%,#f4a2a1 91%,var(--coral) 100%)}
+.frame::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;pointer-events:none;
+  background:radial-gradient(55% 80% at 12% 110%,rgba(255,255,255,.28),transparent 70%),radial-gradient(45% 70% at 92% 110%,rgba(255,236,230,.35),transparent 70%)}
+.nav{display:flex;align-items:center;gap:16px;margin:16px 16px 0;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 20px;box-shadow:0 4px 18px rgba(20,21,25,.05)}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.03em;text-decoration:none;color:var(--ink)}
+.logo-mark{width:28px;height:28px;border-radius:9px;background:var(--ink);display:grid;place-items:center;color:#fff}
+.nav-links{display:flex;gap:28px;margin:0 auto;font-size:14px;font-weight:500;color:var(--ink-2)}
+.nav-links a{text-decoration:none;color:inherit}
+.nav-links a:hover{color:var(--rose)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--pink);color:var(--rose)}
+.icon-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.icon-btn:disabled{opacity:.3;cursor:not-allowed}
+.pill-dark{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:6px 6px 6px 18px;font-weight:700;font-size:14px}
+.pill-dark .arr{width:28px;height:28px;border-radius:50%;background:#45464d;display:grid;place-items:center}
+@media (max-width:760px){.nav{margin:12px 12px 0}.nav-links{display:none}.nav-right{margin-left:auto}.nav .pill-dark{display:none}}
+
+.hero{position:relative;z-index:1;text-align:center;padding:52px 20px 0}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#f1edea;border-radius:999px;padding:5px 14px 5px 5px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.badge i{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c9eef4,#ffd3df);display:grid;place-items:center;font-style:normal;font-size:12px}
+.hero h1{font-size:clamp(34px,5.6vw,62px);line-height:1.16;letter-spacing:-.05em;font-weight:800;margin:20px 0 0;color:var(--ink)}
+.cta-row{position:relative;display:inline-block;margin-top:38px}
+.cta{display:inline-flex;align-items:center;gap:18px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:9px 9px 9px 32px;font-size:18px;font-weight:700;box-shadow:0 12px 30px rgba(20,21,25,.22);transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(20,21,25,.28)}
+.cta .arr{width:46px;height:46px;border-radius:50%;background:#4a4b52;display:grid;place-items:center;transition:transform .2s}
+.cta:hover .arr{transform:translateX(3px)}
+.click-note{position:absolute;left:calc(100% + 6px);top:2px;display:flex;align-items:flex-start;pointer-events:none}
+.click-note span{font-family:Caveat,cursive;font-size:30px;font-weight:700;color:var(--ink);transform:rotate(-10deg);margin:20px 0 0 -4px}
+@media (max-width:620px){.click-note{left:calc(100% - 14px);top:-30px;align-items:center}.click-note svg{width:34px;height:22px;transform:rotate(28deg)}.click-note span{margin:0 0 0 -2px;font-size:24px}}
+.proof{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;font-size:13px;color:var(--muted)}
+.avs{display:flex}
+.avs b{width:28px;height:28px;border-radius:50%;border:2px solid #fff;margin-left:-8px;display:grid;place-items:center;font-size:11px;color:#fff}
+.avs b:first-child{margin-left:0}
+.stars{color:#f4a3b8;letter-spacing:1px;font-size:13px}
+.marquee{margin-top:54px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.track{display:flex;gap:10px;width:max-content;animation:slide 34s linear infinite}
+.chip{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.95);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.chip i{width:14px;height:14px;border-radius:50%;background:var(--coral);box-shadow:inset 0 0 0 3px #fde4e3}
+.chip:nth-child(even) i{background:var(--ink);box-shadow:inset 0 0 0 3px #e9e6e4}
+@keyframes slide{to{transform:translateX(-50%)}}
+.checks{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);max-width:980px;margin:34px auto 0;padding:0 24px 64px;text-align:center}
+.checks > div{display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 28px;font-size:16px;font-weight:700;line-height:1.45;color:var(--ink)}
+.checks > div + div{border-left:1px solid rgba(20,21,25,.14)}
+.checks svg{flex:none}
+@media (max-width:760px){.checks{grid-template-columns:1fr;padding-bottom:40px}.checks > div{padding:14px 6px}.checks > div + div{border-left:0;border-top:1px solid rgba(20,21,25,.12)}}
+
+/* ---------- section ---------- */
+section.block{padding:96px 0 0}
+.h2{font-size:clamp(26px,3.6vw,40px);font-weight:800;letter-spacing:-.045em;line-height:1.25;text-align:center;margin:0 0 12px}
+.lead{text-align:center;color:var(--muted);margin:0 auto 40px;max-width:560px;line-height:1.6;font-size:15px}
+.box.card{background:var(--card);border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow)}
+
+/* ---------- consent ---------- */
+#consent,#calendar,#admin{scroll-margin-top:24px}
+.consent-card{max-width:820px;margin:0 auto;padding:34px}
+.ptable{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:15px;margin:18px 0 6px}
+.ptable th,.ptable td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55}
+.ptable tr:last-child th,.ptable tr:last-child td{border-bottom:0}
+.ptable th{background:#faf6f4;width:28%;font-weight:700;color:var(--ink-2)}
+.intro{margin:0;font-size:15px;color:var(--ink-2);line-height:1.65}
+.warn-red{color:var(--red);font-size:15px;font-weight:700;line-height:1.65;margin:16px 0}
+.qtitle{font-size:14px;font-weight:700;color:var(--ink-2);margin:0 0 8px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.choice{grid-template-columns:1fr}.consent-card{padding:22px}}
+.choice label{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;font-size:15px;font-weight:600;transition:.15s;background:#fff}
+.choice label:hover{border-color:var(--pink)}
+.choice input{accent-color:var(--rose);width:18px;height:18px;margin:0}
+.choice label:has(input:checked){border-color:var(--rose);background:var(--pink-soft)}
+.aff-box{margin-top:22px;padding-top:22px;border-top:1px dashed var(--line);transition:opacity .2s}
+.aff-box.lock{opacity:.4}
+.aff-note{margin:0 0 12px;font-size:15px;line-height:1.65;color:var(--ink-2);background:var(--aqua-soft);border-radius:14px;padding:14px 16px}
+.done{display:flex;align-items:center;gap:12px;margin-top:22px;padding:14px 16px;border-radius:14px;background:#effaf4;color:#1b7a4b;font-weight:700;font-size:15px}
+.done button{margin-left:auto}
+
+/* ---------- calendar ---------- */
+.cal-shell{padding:28px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.month-nav{display:flex;align-items:center;gap:10px}
+.month-nav h3{margin:0;font-size:26px;font-weight:800;letter-spacing:-.04em;min-width:160px;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;font-weight:500;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:5px;display:inline-block;border:1px solid rgba(217,99,127,.15)}
+.window-note{font-size:14px;color:var(--ink-2);background:var(--aqua-soft);border-radius:14px;padding:12px 16px;margin-bottom:18px;line-height:1.5}
+.window-note b{color:var(--sea)}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.dow{font-size:17px;font-weight:800;color:var(--ink-2);text-align:center;padding:8px 0 10px}
+.dow.sun{color:var(--rose)}.dow.sat{color:var(--sea)}
+.day{position:relative;min-height:118px;border-radius:16px;border:1px solid var(--line);background:#fff;padding:9px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.day:hover{border-color:var(--pink);box-shadow:0 6px 18px rgba(244,163,184,.22)}
+.day.blank{border:0;background:transparent;cursor:default;box-shadow:none}
+.mascot-cell{flex-direction:row;align-items:flex-end;justify-content:flex-end;gap:12px;padding:4px 10px 0 6px}
+.mascot{height:104px;width:auto;max-width:100%;object-fit:contain;transform-origin:50% 100%;animation:mascotIn .7s cubic-bezier(.34,1.56,.64,1) both,mascotBob 2.8s ease-in-out .7s infinite}
+.mascot-talk{position:relative;align-self:center;background:#fff;border:1.5px solid var(--coral);color:var(--rose-ink);font-size:13px;font-weight:700;border-radius:16px;padding:8px 12px;line-height:1.35;box-shadow:0 6px 16px rgba(242,145,145,.2);animation:mascotIn .5s .35s both;max-width:180px}
+.mascot-talk::after{content:"";position:absolute;right:-7px;top:50%;width:11px;height:11px;background:#fff;border-right:1.5px solid var(--coral);border-top:1.5px solid var(--coral);transform:translateY(-50%) rotate(45deg)}
+@keyframes mascotIn{from{opacity:0;transform:translateY(24px) scale(.6)}}
+@keyframes mascotBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(-3deg)}}
+@media (prefers-reduced-motion:reduce){.mascot,.mascot-talk{animation:none}}
+.day .top{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.dnum{font-weight:800;font-size:15px}
+.day.sun .dnum,.day.hol .dnum{color:var(--rose)}
+.day.sat .dnum{color:var(--sea)}
+.day.today .dnum{background:var(--ink);color:#fff;border-radius:999px;padding:1px 8px}
+.tag{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag.off{background:#f3eeeb;color:#9a8f89}
+.tag.open{background:var(--aqua-soft);color:var(--sea)}
+.holname{font-size:11px;color:var(--rose);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day.off{background:repeating-linear-gradient(135deg,#fbf8f6 0 6px,#f6f1ee 6px 12px)}
+.day.past{opacity:.55}
+.day.inwin{border-color:#cdeef2}
+.bars{display:flex;flex-direction:column;gap:4px;margin-top:auto}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:4px;height:23px;border-radius:8px;border:0;padding:0 8px;font-size:11px;font-weight:700;text-align:left;background:#faf7f5;color:#cfc5c0;cursor:pointer;transition:transform .12s,filter .12s}
+.bar.has{color:var(--rose-ink);box-shadow:inset 0 0 0 1px rgba(217,99,127,.1)}
+.bar.has.am{background:linear-gradient(90deg,var(--am-a),var(--am-b))}
+.bar.has.pm{background:linear-gradient(90deg,var(--pm-a),var(--pm-b))}
+.bar.has.eve{background:linear-gradient(90deg,var(--eve-a),var(--eve-b));color:#8e344e}
+.bar.has:hover{filter:saturate(1.2) brightness(.98);transform:translateY(-1px)}
+.bar em{font-style:normal;font-weight:800}
+.bar.has.pend{background:linear-gradient(90deg,var(--wait-a),var(--wait-b));color:var(--wait-ink);box-shadow:inset 0 0 0 1px rgba(60,150,200,.18)}
+.bar.has.mixpend em::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#7cc4ea;margin-right:4px;vertical-align:1px}
+.loading{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+@media (max-width:760px){
+  .cal-shell{padding:14px}
+  .grid{gap:3px}
+  .dow{font-size:15px}
+  .day{min-height:80px;padding:5px;border-radius:10px;gap:3px}
+  .mascot{height:72px}
+  .mascot-talk{display:none}
+  .dnum{font-size:12px}
+  .day.today .dnum{padding:0 5px}
+  .tag,.holname{display:none}
+  .bar{height:11px;padding:0;border-radius:4px;font-size:0}
+  .bar em{display:none}
+  .month-nav h3{font-size:20px;min-width:120px}
+}
+
+/* ---------- bubble ---------- */
+.bubble{position:absolute;z-index:60;width:300px;max-width:calc(100vw - 32px);background:var(--ink);color:#fff;border-radius:18px;padding:16px 16px 14px;box-shadow:0 18px 40px rgba(20,21,25,.28);animation:pop .16s ease-out}
+.bubble:after{content:"";position:absolute;left:var(--tail,50%);width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:3px}
+.bubble.below:after{top:-6px}
+.bubble.above:after{bottom:-6px}
+.bubble h4{margin:0 0 10px;font-size:15px;letter-spacing:-.02em;display:flex;justify-content:space-between;align-items:center}
+.bubble h4 button{background:none;border:0;color:#aaa;font-size:18px;line-height:1;padding:0 2px}
+.bubble ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.bubble li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+.bubble li i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:6px}
+.bubble li b{font-variant-numeric:tabular-nums;font-weight:800;margin-right:6px}
+.bubble li small{display:block;color:#b8bac2;font-size:12px}
+.st{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+.st.pending{background:#fff2c7;color:#8a6500}.st.approved{background:#d4f5e2;color:#16794a}.st.rejected{background:#ffe0e4;color:#b42339}
+.bubble .go{margin-top:14px;width:100%;border:0;border-radius:999px;background:#fff;color:var(--ink);font-weight:800;padding:10px}
+@keyframes pop{from{opacity:0;transform:translateY(4px) scale(.98)}}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(20,21,25,.42);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .18s}
+@keyframes fade{from{opacity:0}}
+.sheet{background:#fff;border-radius:26px;width:100%;max-width:720px;max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 30px 70px rgba(20,21,25,.3);animation:pop .2s ease-out}
+.sheet-h{position:sticky;top:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:22px 24px 14px;border-bottom:1px solid var(--line)}
+.sheet-h h3{margin:0;font-size:21px;font-weight:800;letter-spacing:-.04em}
+.sheet-b{padding:20px 24px 24px}
+.x{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:18px;line-height:1}
+.lbl{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin:0 0 6px}
+.field{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;outline:none;transition:.15s;background:#fff}
+.field:focus{border-color:var(--pink);box-shadow:0 0 0 4px var(--pink-soft)}
+.row2{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-bottom:16px}
+@media (max-width:600px){.row2{grid-template-columns:1fr}}
+.slots-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
+.slots-h small{color:var(--muted);font-size:12px}
+.slots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+@media (max-width:560px){.slots{grid-template-columns:repeat(4,1fr)}}
+.slot{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:8px 0;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;transition:.12s;line-height:1.25}
+.slot small{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
+.slot:hover{border-color:var(--pink)}
+.slot.busy{background:repeating-linear-gradient(135deg,#fdeef2 0 5px,#fbe2e9 5px 10px);border-color:#f8d4de;color:#c7728a}
+.slot.busy small{color:#d495a7}
+.slot.pend{background:linear-gradient(180deg,var(--wait-a),var(--wait-b));border-color:#c6e5f8;color:var(--wait-ink)}
+.slot.pend small{color:var(--wait-ink);font-weight:700}
+.slot.busy small{font-weight:700}
+.slot.past{background:#f6f3f1;color:#c6beb9;border-color:#f0ebe7}
+.slot.sel{background:var(--pink-soft);border-color:var(--pink);color:var(--rose-ink)}
+.slot.edge{background:var(--ink);border-color:var(--ink);color:#fff}
+.slot.edge small{color:#c9cad0}
+.slot-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 6px}
+.slot-legend span{display:inline-flex;align-items:center;gap:6px}
+.slot-legend i{width:14px;height:14px;border-radius:5px;border:1.5px solid var(--line);background:#fff}
+.slot-legend .k-pend{background:linear-gradient(180deg,var(--wait-a),var(--wait-b));border-color:#c6e5f8}
+.slot-legend .k-busy{background:repeating-linear-gradient(135deg,#fdeef2 0 3px,#fbe2e9 3px 6px);border-color:#f8d4de}
+.period-lbl{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px}
+.period-lbl i{width:10px;height:10px;border-radius:4px;border:1px solid rgba(217,99,127,.2)}
+.summary{margin-top:16px;padding:14px 16px;border-radius:14px;background:#faf6f4;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.summary b{font-size:16px}
+.btn-main{width:100%;margin-top:16px;border:0;border-radius:999px;background:var(--ink);color:#fff;font-weight:800;font-size:16px;padding:15px}
+.btn-main:hover{background:#2b2c33}
+.btn-main:disabled{opacity:.5;cursor:wait}
+.btn-ghost{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px}
+
+/* alert */
+.alert{max-width:380px;text-align:center;padding:30px 26px 22px}
+.alert .ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto 14px;font-size:26px;font-weight:800}
+.alert .ic.ok{background:#e6f7ef;color:#1b7a4b}
+.alert .ic.warn{background:var(--pink-soft);color:var(--rose)}
+.alert .ic.info{background:var(--aqua-soft);color:var(--sea)}
+.alert h4{margin:0 0 8px;font-size:19px;font-weight:800;letter-spacing:-.035em;line-height:1.4}
+.alert p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;white-space:pre-line}
+.alert .btns{display:flex;gap:8px;margin-top:20px}
+.alert .btns button{flex:1;margin:0}
+
+/* ---------- admin ---------- */
+.admin-shell{background:var(--ink);color:#fff;border-radius:30px;padding:26px}
+.admin-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.admin-top h3{margin:0;font-size:22px;font-weight:800;letter-spacing:-.04em;display:flex;align-items:center;gap:10px}
+.admin-top h3 small{font-size:12px;font-weight:800;background:var(--pink);color:var(--ink);border-radius:999px;padding:3px 10px}
+.mode{font-size:12px;color:#9b9da6;margin:-6px 0 14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid #3a3b42;background:transparent;color:#cfd0d6;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700}
+.tabs button.on{background:#fff;color:var(--ink);border-color:#fff}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-actions button{border:1px solid #3a3b42;background:#26272d;color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700}
+.tbl-wrap{overflow-x:auto;border-radius:16px;background:#202127}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;min-width:860px}
+.tbl th,.tbl td{padding:11px 12px;text-align:left;border-bottom:1px solid #2f3037;white-space:nowrap}
+.tbl th{color:#9b9da6;font-weight:700;font-size:12px}
+.tbl td.t{white-space:normal;min-width:160px}
+.tbl .acts{display:flex;gap:6px}
+.tbl .acts button{border:0;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:800}
+.a-ok{background:#ffd3df;color:#7d2a43}.a-no{background:#3a3b42;color:#ffb3c3}.a-del{background:#3a3b42;color:#ddd}
+.empty{padding:30px;text-align:center;color:#9b9da6}
+
+footer{padding:90px 20px 40px;text-align:center;color:var(--muted);font-size:13px;line-height:1.8}
+footer .contact b{color:var(--ink)}
+footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line);max-width:1080px;font-size:13px;color:#8a8e96}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO (둥근 박스) ============ -->
+<div class="frame-outer" id="top">
+  <div class="glow">
+    <div class="box frame">
+      <header class="nav">
+        <a class="logo" href="#top">
+          <span class="logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 14c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" opacity=".55"/><circle cx="12" cy="6" r="2.4"/></svg></span>
+          AI Seminar
+        </a>
+        <nav class="nav-links">
+          <a href="#consent">개인정보 동의</a>
+          <a href="#calendar">예약 현황</a>
+          <a href="#contact">문의</a>
+        </nav>
+        <div class="nav-right">
+          <button class="icon-btn" id="adminBtn" title="관리자 로그인" aria-label="관리자 로그인">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5"/><rect x="14" y="16" width="7" height="5" rx="1.2"/><path d="M15.6 16v-1.4a1.9 1.9 0 0 1 3.8 0V16"/></svg>
+          </button>
+          <button class="pill-dark" data-book>예약 하기 <span class="arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+        </div>
+      </header>
+
+      <div class="hero">
+        <span class="badge"><i>🌊</i>상상관 4층 · 413호</span>
+        <h1>인공지능응용학과<br>세미나실 예약</h1>
+
+        <div class="cta-row">
+          <button class="cta" data-book>예약 하기
+            <span class="arr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span>
+          </button>
+          <div class="click-note" aria-hidden="true">
+            <svg width="70" height="40" viewBox="0 0 70 40" fill="none" stroke="#141519" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M66 18c-10 10-30 14-58 6"/><path d="M15 16 7 24l10 5"/></svg>
+            <span>Click</span>
+          </div>
+        </div>
+
+        <div class="proof">
+          <div class="avs"><b style="background:#141519">AI</b><b style="background:#F29191">L</b><b style="background:#e2727a">P</b><b style="background:#f6b3b0">+</b></div>
+          <div style="text-align:left;line-height:1.3"><span class="stars">★★★★★</span><br>인공지능응용학과 학생 · 교수님 전용</div>
+        </div>
+
+        <div class="marquee"><div class="track" id="track"></div></div>
+      </div>
+
+      <div class="checks">
+        <div><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#141519"/><path d="m7.5 12.3 3 3 6-6.3" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>오늘부터 1개월 이내 예약</div>
+        <div><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#141519"/><path d="m7.5 12.3 3 3 6-6.3" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>담당자 승인제</div>
+        <div><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#141519"/><path d="m7.5 12.3 3 3 6-6.3" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>문의: 02-970-9726</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 개인정보 동의 ============ -->
+<section class="block" id="consent" hidden>
+  <div class="wrap">
+    <h2 class="h2">개인정보 수집 · 이용 동의</h2>
+    <p class="lead">동의와 학과 소속 확인을 마치면 예약 현황 달력으로 이동합니다.</p>
+    <div class="glow" style="max-width:820px;margin:0 auto">
+      <div class="box card consent-card">
+        <p class="intro">인공지능응용학과는 세미나실 대여 관리를 위해 아래와 같이 개인정보를 수집 · 이용합니다.</p>
+        <table class="ptable">
+          <tr><th>수집 항목</th><td>이름, 연구실명(부서명)</td></tr>
+          <tr><th>수집 목적</th><td>세미나실 대여 관리</td></tr>
+          <tr><th>보유 기간</th><td><b>6개월</b><br><span style="color:var(--muted);font-size:13px">입력한 날로부터 6개월이 지나면 해당 데이터는 삭제됩니다.</span></td></tr>
+        </table>
+        <p class="warn-red">※ 위의 개인정보 수집‧이용에 대한 동의를 거부할 권리가 있습니다.<br>그러나 동의를 거부할 경우 세미나실 대여가 불가합니다.</p>
+        <p class="qtitle">개인정보 수집 · 이용에 동의하십니까?</p>
+        <div class="choice">
+          <label><input type="radio" name="agree" value="y"> 동의합니다</label>
+          <label><input type="radio" name="agree" value="n"> 동의하지 않습니다</label>
+        </div>
+        <div class="aff-box lock" id="affBox">
+          <p class="aff-note">인공지능응용학과 학생, 교수님만 예약 가능합니다.<br>인공지능응용학과 소속이 아닐 경우 예약이 거부됩니다.</p>
+          <div class="choice">
+            <label><input type="radio" name="aff" value="y"> 인공지능응용학과 소속입니다</label>
+            <label><input type="radio" name="aff" value="n"> 소속이 아닙니다</label>
+          </div>
+        </div>
+        <div class="done" id="doneBox" hidden>✓ 동의 및 소속 확인 완료 <button class="btn-ghost" id="goCal" type="button">예약 현황 보기</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 달력 ============ -->
+<section class="block" id="calendar" hidden>
+  <div class="wrap">
+    <h2 class="h2">세미나실 대여 현황</h2>
+    <p class="lead">색이 칠해진 시간대를 누르면 상세 시간을 볼 수 있어요.<br>날짜를 누르면 예약 화면이 열립니다.</p>
+    <div class="glow">
+      <div class="box card cal-shell">
+        <div class="cal-head">
+          <div class="month-nav">
+            <button class="icon-btn" id="prevM" aria-label="이전 달"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg></button>
+            <h3 id="mTitle"></h3>
+            <button class="icon-btn" id="nextM" aria-label="다음 달"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></button>
+            <button class="btn-ghost" id="todayBtn">오늘</button>
+          </div>
+          <div class="legend">
+            <span><i style="background:linear-gradient(90deg,var(--am-a),var(--am-b))"></i>오전 08–12</span>
+            <span><i style="background:linear-gradient(90deg,var(--pm-a),var(--pm-b))"></i>오후 12–18</span>
+            <span><i style="background:linear-gradient(90deg,var(--eve-a),var(--eve-b))"></i>저녁 18–22</span>
+            <span><i style="background:linear-gradient(90deg,var(--wait-a),var(--wait-b));border-color:#c6e5f8"></i>승인대기</span>
+            <span><i style="background:repeating-linear-gradient(135deg,#fbf8f6 0 3px,#e8e0db 3px 6px)"></i>예약불가</span>
+          </div>
+        </div>
+        <div class="window-note" id="winNote"></div>
+        <div class="grid" id="grid"><div class="loading">불러오는 중…</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 관리자 ============ -->
+<section class="block" id="admin" hidden>
+  <div class="wrap">
+    <div class="glow">
+      <div class="box admin-shell">
+        <div class="admin-top">
+          <h3>관리자 · 예약 관리 <small id="pendCount">승인대기 0</small></h3>
+          <div class="admin-actions">
+            <button id="reloadBtn">새로고침</button>
+            <button id="csvBtn">CSV 내보내기</button>
+            <button id="logoutBtn">로그아웃</button>
+          </div>
+        </div>
+        <p class="mode" id="modeNote"></p>
+        <div class="tabs" id="admTabs" style="margin-bottom:14px">
+          <button data-f="pending" class="on">승인대기</button>
+          <button data-f="web">온라인 신청 전체</button>
+          <button data-f="approved">승인됨</button>
+          <button data-f="rejected">반려</button>
+          <button data-f="all">전체(기존 일정 포함)</button>
+        </div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>사용일</th><th>시간</th><th>이름 / 내용</th><th>연구실(부서)</th><th>상태</th><th>신청일</th><th>삭제 예정일</th><th>처리</th></tr></thead><tbody id="admBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="contact"><b>인공지능응용학과 세미나실</b> · 상상관 4층 413호 · 문의 02-970-9726<br>
+  수집된 개인정보는 세미나실 대여 관리 목적으로만 사용되며, 입력일로부터 6개월 후 삭제됩니다.</div>
+  <div class="copy">© 2026 C.E. Jung. All rights reserved</div>
+</footer>
+
+<!-- 예약하기 -->
+<div class="modal" id="bookModal" hidden>
+  <div class="sheet">
+    <div class="sheet-h"><h3>예약하기</h3><button class="x" data-close>×</button></div>
+    <div class="sheet-b">
+      <form id="bookForm" autocomplete="off" novalidate>
+        <div style="margin-bottom:16px"><label class="lbl" for="fDate">사용 날짜</label><input class="field" type="date" id="fDate"></div>
+        <div class="row2">
+          <div><label class="lbl" for="fName">이름</label><input class="field" id="fName" maxlength="20" placeholder="홍길동"></div>
+          <div><label class="lbl" for="fDept">연구실명(부서명)</label><input class="field" id="fDept" maxlength="40" placeholder="인공지능응용 연구실"></div>
+        </div>
+        <div class="slots-h"><span class="lbl" style="margin:0">사용 시간</span><small>1시간 단위 · 시작 시간 → 마지막 시간 순서로 눌러 주세요</small></div>
+        <div class="slot-legend"><span><i class="k-free"></i>예약 가능</span><span><i class="k-pend"></i>승인대기</span><span><i class="k-busy"></i>예약됨</span></div>
+        <div class="slots" id="slots"></div>
+        <div class="summary"><span>선택한 시간</span><b id="selText">-</b></div>
+        <button class="btn-main" type="submit" id="submitBtn">예약 신청하기</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 로그인 -->
+<div class="modal" id="loginModal" hidden>
+  <div class="sheet alert">
+    <div class="ic info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+    <h4>관리자 로그인</h4>
+    <p>관리자 비밀번호를 입력하세요.</p>
+    <form id="loginForm" style="margin-top:16px">
+      <input class="field" type="password" id="pw" placeholder="비밀번호" autocomplete="off">
+      <div class="btns"><button type="button" class="btn-ghost" data-close>취소</button><button type="submit" class="btn-main">로그인</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- 알림 팝업 -->
+<div class="modal" id="alertModal" hidden>
+  <div class="sheet alert">
+    <div class="ic" id="aIc"></div>
+    <h4 id="aTitle"></h4>
+    <p id="aMsg"></p>
+    <div class="btns" id="aBtns"></div>
+  </div>
+</div>
+
+<script>
+/* ================= 설정 ================= */
+// Google Sheets 연동: Apps Script 웹 앱 배포 URL을 넣으세요. 비워 두면 이 브라우저에만 저장되는 미리보기 모드로 동작합니다.
+const API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnS-vJIyQLSDYKaTtwwbaGK4VcupPoWhAihM1JBTen_WSX0TSoz8D_zRNZ_J3tV2qprhAjxJbK9Zq9CxjEIEkwq4HqFbPj0Y6GsrJxZIlLPv8YSUHF-5cJzyQeklopWRQl0SOx_1TbMIxzlzRL6FVPyTywwdplukqGlpFl2etmyBbZ4WYii4DD7jbwyuT2b2ujJfHDDyxzgveQO2bs1O5vOXOscjBXp_540RWnPhTxj-_zXbYaxMdOeBPD-AQc7xyvGemU9xkPNc0eHIE28FtXhaqxn0UH49hT_9ruUd&lib=MPDjr8hKlOxFnig5GcVIyhSJWY7JBlX_n';
+// 관리자 비밀번호는 이 파일에 두지 않습니다 — Google Sheets 서버(Code.gs)에서만 확인합니다.
+// (API_URL이 비어 있는 미리보기 모드에서는 관리자 로그인이 되지 않습니다)
+const LOCAL_ADMIN_PW = '';
+
+// 엑셀(상상관 413호 대여.xlsx)의 2026-10 이후 수업 · 기존 예약 [날짜, 시작시, 종료시, 구분] — 미리보기 모드용(이름 제외)
+const SEED = [["2026-10-01",13,16,"수업"],["2026-10-01",16,18,"예약"],["2026-10-02",15,16,"예약"],["2026-10-02",16,18,"예약"],["2026-10-05",14,17,"수업"],["2026-10-05",19,22,"수업"],["2026-10-06",9,12,"수업"],["2026-10-06",12,13,"예약"],["2026-10-06",17,19,"예약"],["2026-10-07",13,16,"수업"],["2026-10-07",16,19,"수업"],["2026-10-08",13,16,"수업"],["2026-10-08",16,18,"예약"],["2026-10-09",16,18,"예약"],["2026-10-12",14,17,"수업"],["2026-10-12",19,22,"수업"],["2026-10-13",9,12,"수업"],["2026-10-13",12,13,"예약"],["2026-10-13",17,19,"예약"],["2026-10-14",13,16,"수업"],["2026-10-14",16,19,"수업"],["2026-10-15",13,16,"수업"],["2026-10-15",16,18,"예약"],["2026-10-16",16,18,"예약"],["2026-10-19",14,17,"수업"],["2026-10-19",19,22,"수업"],["2026-10-20",9,12,"수업"],["2026-10-20",17,19,"예약"],["2026-10-21",13,16,"수업"],["2026-10-21",16,19,"수업"],["2026-10-22",9,12,"예약"],["2026-10-22",13,16,"수업"],["2026-10-22",16,18,"예약"],["2026-10-23",16,18,"예약"],["2026-10-26",14,17,"수업"],["2026-10-26",19,22,"수업"],["2026-10-27",9,12,"수업"],["2026-10-27",12,13,"예약"],["2026-10-27",17,19,"예약"],["2026-10-28",13,16,"수업"],["2026-10-28",16,19,"수업"],["2026-10-29",13,16,"수업"],["2026-10-29",16,18,"예약"],["2026-10-30",16,18,"예약"],["2026-11-02",14,17,"수업"],["2026-11-02",19,22,"수업"],["2026-11-03",9,12,"수업"],["2026-11-03",17,19,"예약"],["2026-11-04",13,16,"수업"],["2026-11-04",16,19,"수업"],["2026-11-05",13,16,"수업"],["2026-11-05",16,18,"예약"],["2026-11-06",16,18,"예약"],["2026-11-09",14,17,"수업"],["2026-11-09",19,22,"수업"],["2026-11-10",9,12,"수업"],["2026-11-10",12,13,"예약"],["2026-11-10",17,19,"예약"],["2026-11-11",13,16,"수업"],["2026-11-11",16,19,"수업"],["2026-11-12",13,16,"수업"],["2026-11-12",16,18,"예약"],["2026-11-13",16,18,"예약"],["2026-11-16",14,17,"수업"],["2026-11-16",19,22,"수업"],["2026-11-17",9,12,"수업"],["2026-11-17",17,19,"예약"],["2026-11-18",13,16,"수업"],["2026-11-18",16,19,"수업"],["2026-11-19",13,16,"수업"],["2026-11-19",16,18,"예약"],["2026-11-20",16,18,"예약"],["2026-11-23",14,17,"수업"],["2026-11-23",19,22,"수업"],["2026-11-24",9,12,"수업"],["2026-11-24",12,13,"예약"],["2026-11-24",17,19,"예약"],["2026-11-25",13,16,"수업"],["2026-11-25",16,19,"수업"],["2026-11-26",13,16,"수업"],["2026-11-26",16,18,"예약"],["2026-11-27",16,18,"예약"],["2026-11-30",14,17,"수업"],["2026-11-30",19,22,"수업"],["2026-12-01",9,12,"수업"],["2026-12-01",17,19,"예약"],["2026-12-02",13,16,"수업"],["2026-12-02",16,19,"수업"],["2026-12-03",13,16,"수업"],["2026-12-03",16,18,"예약"],["2026-12-04",16,18,"예약"],["2026-12-07",14,17,"수업"],["2026-12-07",19,22,"수업"],["2026-12-08",9,12,"수업"],["2026-12-08",12,13,"예약"],["2026-12-08",17,19,"예약"],["2026-12-09",13,16,"수업"],["2026-12-09",16,19,"수업"],["2026-12-10",13,16,"수업"],["2026-12-10",16,18,"예약"],["2026-12-11",16,18,"예약"],["2026-12-14",14,17,"수업"],["2026-12-14",19,22,"수업"],["2026-12-15",9,12,"수업"],["2026-12-15",17,19,"예약"],["2026-12-16",13,16,"수업"],["2026-12-16",16,19,"수업"],["2026-12-17",13,16,"수업"],["2026-12-18",16,18,"예약"],["2026-12-21",14,17,"수업"],["2026-12-21",19,22,"수업"],["2026-12-22",12,13,"예약"],["2026-12-22",17,19,"예약"]];
+
+// 공휴일(대체공휴일 포함) — Code.gs의 목록과 함께 수정하세요
+const HOLIDAYS = {
+  '2026-10-03':'개천절','2026-10-05':'대체공휴일','2026-10-09':'한글날','2026-12-25':'성탄절',
+  '2027-01-01':'신정','2027-02-06':'설날 연휴','2027-02-07':'설날','2027-02-08':'설날 연휴','2027-02-09':'대체공휴일',
+  '2027-03-01':'삼일절','2027-05-05':'어린이날','2027-05-13':'부처님오신날','2027-06-06':'현충일',
+  '2027-08-15':'광복절','2027-08-16':'대체공휴일','2027-09-14':'추석 연휴','2027-09-15':'추석','2027-09-16':'추석 연휴',
+  '2027-10-03':'개천절','2027-10-04':'대체공휴일','2027-10-09':'한글날','2027-10-11':'대체공휴일',
+  '2027-12-25':'성탄절','2027-12-27':'대체공휴일'
+};
+
+const OPEN = 8, CLOSE = 22;            // 08:00 ~ 22:00, 1시간 단위
+const PERIODS = [
+  {k:'am', n:'오전', s:8,  e:12, c:'linear-gradient(90deg,var(--am-a),var(--am-b))',  dot:'#ffd6e2'},
+  {k:'pm', n:'오후', s:12, e:18, c:'linear-gradient(90deg,var(--pm-a),var(--pm-b))',  dot:'#f9b9cc'},
+  {k:'eve',n:'저녁', s:18, e:22, c:'linear-gradient(90deg,var(--eve-a),var(--eve-b))',dot:'#f08fad'}
+];
+const MIN_MONTH = new Date(2026, 9, 1);   // 2026년 10월부터 조회
+const RETENTION_MONTHS = 6;
+const DOW = ['일','월','화','수','목','금','토'];
+const ST_TXT = { pending:'승인대기', approved:'승인', rejected:'반려' };
+
+/* ================= 유틸 ================= */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const hh = h => `${pad(h)}:00`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const krDate = s => { const d = parseD(s); return `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const MAX_DAY = new Date(TODAY.getFullYear(), TODAY.getMonth()+1, TODAY.getDate()-1); // 10/6 → 11/5
+
+function expiry(createdAt){ const d = new Date(createdAt); d.setMonth(d.getMonth()+RETENTION_MONTHS); return d; }
+function dayInfo(ds){
+  const d = parseD(ds), dow = d.getDay(), hol = HOLIDAYS[ds];
+  return { d, dow, hol, off: dow===0 || dow===6 || !!hol, past: d < TODAY, inWin: d >= TODAY && d <= MAX_DAY };
+}
+const overlaps = (list, date, s, e, skipId) => list.find(r => r.id !== skipId && r.status !== 'rejected' && r.date === date && r.start < e && r.end > s);
+
+/* ================= 저장소 =================
+   - API_URL 있음: Google Sheets (Apps Script 웹 앱) — 모두가 같은 데이터를 봄
+   - API_URL 없음: 이 브라우저의 localStorage (미리보기용)                     */
+const Remote = {
+  async get(params){
+    const r = await fetch(API_URL + '?' + new URLSearchParams(params));
+    return r.json();
+  },
+  async post(body){ // text/plain 으로 보내 CORS 사전요청을 피함
+    const r = await fetch(API_URL, { method:'POST', body: JSON.stringify(body) });
+    return r.json();
+  },
+  list(){ return this.get({ action:'list' }); },
+  create(p){ return this.post({ action:'create', ...p }); },
+  adminList(pw){ return this.post({ action:'adminList', pw }); },
+  setStatus(pw, id, status){ return this.post({ action:'setStatus', pw, id, status }); },
+  remove(pw, id){ return this.post({ action:'delete', pw, id }); }
+};
+const Local = {
+  KEY:'ai413.reservations.v2',
+  load(){
+    let db;
+    try { const raw = localStorage.getItem(this.KEY); if (raw) db = JSON.parse(raw); } catch(e){}
+    if (!db) db = SEED.map((e,i) => ({ id:'imp'+i, date:e[0], start:e[1], end:e[2], name:e[3]==='수업'?'수업':'기존 예약', dept:'',
+      type:e[3]==='수업'?'class':'reserve', status:'approved', source:'import', createdAt:'2026-10-06T00:00:00.000Z' }));
+    const now = new Date();                                   // 입력일로부터 6개월 지난 데이터 삭제
+    db = db.filter(r => expiry(r.createdAt) > now);
+    this.save(db); return db;
+  },
+  save(db){ try { localStorage.setItem(this.KEY, JSON.stringify(db)); } catch(e){} },
+  async list(){ return { ok:true, items: this.load().filter(r => r.status !== 'rejected').map(({date,start,end,type,status}) => ({date,start,end,type,status})) }; },
+  async create(p){
+    const db = this.load(), admin = !!LOCAL_ADMIN_PW && p.pw === LOCAL_ADMIN_PW;
+    const info = dayInfo(p.date);
+    if (info.off) return { ok:false, code:'off' };
+    if (!admin && !info.inWin) return { ok:false, code:'window' };
+    const c = overlaps(db, p.date, p.start, p.end);
+    if (c) return { ok:false, code:'busy', at: Math.max(c.start, p.start) };
+    db.push({ id:'w'+Date.now().toString(36), date:p.date, start:p.start, end:p.end, name:p.name, dept:p.dept,
+              type:'reserve', status: admin ? 'approved' : 'pending', source:'web', createdAt:new Date().toISOString() });
+    this.save(db); return { ok:true, status: admin ? 'approved' : 'pending' };
+  },
+  async adminList(pw){
+    if (!LOCAL_ADMIN_PW) return { ok:false, error:'Google Sheets 연결(API_URL) 후 관리자 로그인을 사용할 수 있습니다.' };
+    return pw === LOCAL_ADMIN_PW ? { ok:true, items:this.load() } : { ok:false, code:'auth' };
+  },
+  async setStatus(pw, id, status){
+    if (!LOCAL_ADMIN_PW || pw !== LOCAL_ADMIN_PW) return { ok:false, code:'auth' };
+    const db = this.load(), r = db.find(x => x.id === id); if (!r) return { ok:false, error:'not found' };
+    if (status === 'approved'){ const c = overlaps(db, r.date, r.start, r.end, r.id); if (c) return { ok:false, code:'busy', at:Math.max(c.start, r.start) }; }
+    r.status = status; this.save(db); return { ok:true };
+  },
+  async remove(pw, id){
+    if (!LOCAL_ADMIN_PW || pw !== LOCAL_ADMIN_PW) return { ok:false, code:'auth' };
+    this.save(this.load().filter(x => x.id !== id)); return { ok:true };
+  }
+};
+const backend = API_URL ? Remote : Local;
+
+/* ================= 상태 ================= */
+let PUB = [], ADM = [];
+// 동의 · 관리자 로그인은 저장하지 않음 — 새로 열 때마다 예약 하기 → 동의 → 달력 순서를 거침
+let adminPw = null;
+let isAdmin = false;
+let consented = false;
+const calData = () => isAdmin ? ADM.filter(r => r.status !== 'rejected') : PUB;
+const onDate = ds => calData().filter(r => r.date === ds).sort((a,b) => a.start - b.start);
+
+async function refresh(){
+  try {
+    const r = await backend.list();
+    if (!r.ok) throw new Error(r.error || 'list failed');
+    PUB = r.items;
+    if (isAdmin){
+      const a = await backend.adminList(adminPw);
+      if (a.ok) ADM = a.items; else { isAdmin = false; adminPw = null; }
+    }
+  } catch(e){
+    popup({ type:'warn', title:'예약 현황을 불러오지 못했습니다', msg:'잠시 후 다시 시도해 주세요.\n(' + e.message + ')' });
+  }
+  applyAdmin(); renderCal(); renderAdmin();
+}
+
+/* ================= 팝업 ================= */
+function openModal(el){ el.hidden = false; document.body.style.overflow = 'hidden'; }
+function closeModal(el){ el.hidden = true; if (![...document.querySelectorAll('.modal')].some(m => !m.hidden)) document.body.style.overflow = ''; }
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-close]'); if (c) closeModal(c.closest('.modal'));
+  if (e.target.classList.contains('modal') && e.target.id !== 'alertModal') closeModal(e.target);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  hideBubble();
+  const open = [...document.querySelectorAll('.modal')].filter(m => !m.hidden).pop();
+  if (open && open.id !== 'alertModal') closeModal(open);
+});
+function popup({ type='info', title, msg='', ok='확인', cancel }){
+  return new Promise(res => {
+    const icons = { ok:'✓', warn:'!', info:'i' };
+    $('#aIc').className = 'ic ' + type; $('#aIc').textContent = icons[type];
+    $('#aTitle').textContent = title; $('#aMsg').textContent = msg;
+    const btns = $('#aBtns'); btns.innerHTML = '';
+    if (cancel){ const b = document.createElement('button'); b.className = 'btn-ghost'; b.textContent = cancel; b.onclick = () => { closeModal($('#alertModal')); res(false); }; btns.append(b); }
+    const b = document.createElement('button'); b.className = 'btn-main'; b.textContent = ok;
+    b.onclick = () => { closeModal($('#alertModal')); res(true); }; btns.append(b);
+    openModal($('#alertModal')); setTimeout(() => b.focus(), 30);
+  });
+}
+function errorPopup(r){
+  if (r.code === 'busy') return popup({ type:'warn', title: busyMsg(r.date, r.at), msg:'비어 있는 시간만 예약할 수 있습니다.' });
+  if (r.code === 'window') return popup({ type:'warn', title:'한달 단위로 예약 가능합니다.' });
+  if (r.code === 'off') return popup({ type:'warn', title:'주말 및 공휴일은 예약불가입니다' });
+  if (r.code === 'auth') return popup({ type:'warn', title:'관리자 인증이 필요합니다', msg:'다시 로그인해 주세요.' });
+  return popup({ type:'warn', title:'처리하지 못했습니다', msg: r.error || '' });
+}
+
+/* ================= 마퀴 ================= */
+(() => {
+  const items = ['평일 08:00 – 22:00 이용','1시간 단위 예약','오늘부터 1개월 이내 신청','주말 · 공휴일 예약불가','담당자 승인 후 확정','수업 시간은 자동 반영','문의 02-970-9726'];
+  const html = items.map(t => `<span class="chip"><i></i>${t}</span>`).join('');
+  $('#track').innerHTML = html + html;
+})();
+
+/* ================= 예약 하기 → 동의 → 달력 ================= */
+const goTo = id => requestAnimationFrame(() => $(id).scrollIntoView({ behavior:'smooth', block:'start' }));
+function openConsent(){ $('#consent').hidden = false; goTo('#consent'); }
+document.querySelectorAll('[data-book]').forEach(b => b.addEventListener('click', openConsent));
+document.querySelector('a[href="#consent"]').addEventListener('click', e => { e.preventDefault(); openConsent(); });
+document.querySelector('a[href="#calendar"]').addEventListener('click', async e => {
+  e.preventDefault();
+  if (consented || isAdmin) return goTo('#calendar');
+  await popup({ type:'warn', title:'개인정보 동의 해주세요', msg:'예약 하기 → 개인정보 동의 후 예약 현황을 볼 수 있습니다.' });
+  goTo('#top');
+});
+$('#goCal').onclick = () => goTo('#calendar');
+
+// 달력은 동의 + 학과 소속 확인을 마친 사람(또는 관리자)에게만 보임
+function syncSections(){
+  $('#calendar').hidden = !(consented || isAdmin);
+  if (isAdmin) $('#consent').hidden = false;
+}
+function syncConsentUI(){
+  $('#doneBox').hidden = !consented;
+  syncSections();
+}
+document.querySelectorAll('input[name=agree]').forEach(r => r.addEventListener('change', async () => {
+  if (r.value === 'y'){ $('#affBox').classList.remove('lock'); return; }
+  consented = false; syncConsentUI();
+  $('#affBox').classList.add('lock');
+  document.querySelectorAll('input[name=aff]').forEach(i => i.checked = false);
+  await popup({ type:'warn', title:'세미나실 대여가 불가합니다', msg:'개인정보 수집‧이용에 동의하지 않으면\n세미나실 대여가 불가합니다.' });
+}));
+document.querySelectorAll('input[name=aff]').forEach(r => r.addEventListener('change', async () => {
+  const agreed = document.querySelector('input[name=agree]:checked')?.value === 'y';
+  if (!agreed){
+    r.checked = false;
+    return popup({ type:'warn', title:'개인정보 동의 해주세요', msg:'동의하지 않으면 세미나실 대여가 불가합니다.' });
+  }
+  if (r.value === 'n'){
+    consented = false; syncConsentUI();
+    await popup({ type:'warn', title:'관리자에게 문의하세요.', msg:'(02-970-9726)' });
+    r.checked = false; return;
+  }
+  consented = true; syncConsentUI(); renderCal();
+  await wait(250); goTo('#calendar');
+}));
+
+/* ================= 달력 ================= */
+let view = new Date(Math.max(MIN_MONTH, new Date(TODAY.getFullYear(), TODAY.getMonth(), 1)));
+
+function renderCal(){
+  hideBubble();
+  const y = view.getFullYear(), m = view.getMonth();
+  $('#mTitle').textContent = `${y}년 ${m+1}월`;
+  $('#prevM').disabled = view <= MIN_MONTH;
+  $('#winNote').innerHTML = `예약 가능 기간: <b>${krDate(ymd(TODAY))} ~ ${krDate(ymd(MAX_DAY))}</b> · 한 달 단위로 예약할 수 있어요.` +
+    (isAdmin ? ' <b style="color:var(--rose)">(관리자: 기간 제한 없이 등록 · 즉시 승인)</b>' : '');
+
+  let html = DOW.map((d,i) => `<div class="dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+  const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
+  const trail = (7 - (first + days) % 7) % 7;
+  // 달 앞 · 뒤 빈칸 중 더 넓은 쪽에 캐릭터가 한 번 등장
+  const mascotAt = !first && !trail ? null : trail >= first ? 'end' : 'start';
+  html += blankRun(first, mascotAt === 'start', m);
+  for (let d = 1; d <= days; d++){
+    const ds = `${y}-${pad(m+1)}-${pad(d)}`, info = dayInfo(ds), list = onDate(ds);
+    const cls = ['day', info.dow===0?'sun':'', info.dow===6?'sat':'', info.hol?'hol':'', info.off?'off':'', info.past?'past':'',
+                 ds===ymd(TODAY)?'today':'', info.inWin && !info.off ? 'inwin':''].join(' ');
+    let tag = '';
+    if (info.off) tag = '<span class="tag off">예약불가</span>';
+    else if (info.inWin && ds !== ymd(TODAY)) tag = '<span class="tag open">예약가능</span>';
+    const bars = PERIODS.map(p => {
+      const hit = list.filter(r => r.start < p.e && r.end > p.s);
+      const nPend = hit.filter(r => r.status === 'pending').length;
+      const cls = !hit.length ? '' : nPend === hit.length ? 'has pend' : nPend ? 'has mixpend' : 'has';
+      return `<button type="button" class="bar ${p.k} ${cls}" data-p="${p.k}" aria-label="${p.n} ${hit.length}건${nPend ? `, 승인대기 ${nPend}건` : ''}">${p.n}${hit.length?`<em>${nPend === hit.length ? '대기 ' : ''}${hit.length}</em>`:''}</button>`;
+    }).join('');
+    html += `<div class="${cls}" data-date="${ds}" role="button" tabindex="0">
+      <div class="top"><span class="dnum">${d}</span>${tag}</div>
+      ${info.hol ? `<span class="holname">${info.hol}</span>` : ''}
+      <div class="bars">${bars}</div></div>`;
+  }
+  html += blankRun(trail, mascotAt === 'end', m);
+  $('#grid').innerHTML = html;
+}
+
+const MASCOT_SRC = 'data:image/png;base64,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';
+const MASCOT_TALK = ['새해 첫 세미나, 같이 시작해요!','2월도 힘내요!','새 학기 시작! 반가워요','4월의 연구도 화이팅!','5월도 함께해요','6월, 기말까지 조금만 더!','여름방학 세미나 환영해요','8월도 시원하게!','2학기 시작! 반가워요','10월, 예약은 미리미리!','11월도 함께해요','12월, 한 해 수고했어요!'];
+function blankRun(n, withMascot, m){
+  if (!n) return '';
+  if (!withMascot) return `<div class="day blank" style="grid-column:span ${n}"></div>`;
+  return `<div class="day blank mascot-cell" style="grid-column:span ${n}">
+    ${n >= 2 ? `<span class="mascot-talk">${MASCOT_TALK[m]}</span>` : ''}
+    <img class="mascot" src="${MASCOT_SRC}" alt="학과 캐릭터"></div>`;
+}
+$('#prevM').onclick = () => { if (view > MIN_MONTH){ view = new Date(view.getFullYear(), view.getMonth()-1, 1); renderCal(); } };
+$('#nextM').onclick = () => { view = new Date(view.getFullYear(), view.getMonth()+1, 1); renderCal(); };
+$('#todayBtn').onclick = () => { view = new Date(Math.max(MIN_MONTH, new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))); renderCal(); };
+
+$('#grid').addEventListener('click', e => {
+  const day = e.target.closest('.day[data-date]'); if (!day) return;
+  const bar = e.target.closest('.bar');
+  if (bar && bar.classList.contains('has')){ e.stopPropagation(); return showBubble(bar, day.dataset.date, bar.dataset.p); }
+  tryBook(day.dataset.date);
+});
+$('#grid').addEventListener('keydown', e => {
+  const day = e.target.closest('.day[data-date]');
+  if (day && (e.key === 'Enter' || e.key === ' ') && e.target === day){ e.preventDefault(); tryBook(day.dataset.date); }
+});
+
+/* ================= 말풍선 ================= */
+let bubbleEl = null;
+function hideBubble(){ if (bubbleEl){ bubbleEl.remove(); bubbleEl = null; } }
+document.addEventListener('click', e => { if (bubbleEl && !bubbleEl.contains(e.target) && !e.target.closest('.bar')) hideBubble(); });
+window.addEventListener('resize', hideBubble);
+
+function showBubble(anchor, ds, pk){
+  hideBubble();
+  const p = PERIODS.find(x => x.k === pk);
+  const list = onDate(ds).filter(r => r.start < p.e && r.end > p.s);
+  const items = list.map(r => {
+    const dot = r.status === 'pending' ? '#7cc4ea' : (PERIODS.find(x => r.start >= x.s && r.start < x.e) || p).dot;
+    const st = r.status === 'pending' ? '<span class="st pending">승인대기</span>' : '';
+    const label = isAdmin
+      ? `${esc(r.name)}${st}<small>${esc(r.dept)}</small>`
+      : `${r.type === 'class' ? '수업' : '예약'}${st}`;
+    return `<li><i style="background:${dot}"></i><div><b>${hh(r.start)} – ${hh(r.end)}</b>${label}</div></li>`;
+  }).join('');
+  const info = dayInfo(ds);
+  const canBook = !info.off && (isAdmin ? !info.past : info.inWin);
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.innerHTML = `<h4><span>${krDate(ds)} · ${p.n}</span><button aria-label="닫기">×</button></h4><ul>${items}</ul>
+    ${canBook ? '<button class="go">빈 시간 예약하기</button>' : ''}`;
+  document.body.append(b);
+  bubbleEl = b;
+  b.querySelector('h4 button').onclick = hideBubble;
+  const go = b.querySelector('.go'); if (go) go.onclick = () => { hideBubble(); tryBook(ds); };
+
+  const r = anchor.getBoundingClientRect(), bw = b.offsetWidth, bh = b.offsetHeight;
+  let left = r.left + r.width/2 - bw/2 + scrollX;
+  left = Math.max(scrollX + 16, Math.min(left, scrollX + document.documentElement.clientWidth - bw - 16));
+  const below = r.top - bh - 14 < 10;
+  const top = below ? r.bottom + 12 + scrollY : r.top - bh - 12 + scrollY;
+  b.classList.add(below ? 'below' : 'above');
+  b.style.left = left + 'px'; b.style.top = top + 'px';
+  b.style.setProperty('--tail', Math.max(18, Math.min(bw-18, r.left + r.width/2 + scrollX - left)) + 'px');
+}
+
+/* ================= 예약하기 ================= */
+let curDate = null, selA = null, selB = null;
+
+function checkDate(ds){
+  const info = dayInfo(ds);
+  let msg = null;
+  if (parseD(ds) < MIN_MONTH) msg = ['예약할 수 없는 날짜입니다', '2026년 10월부터 예약할 수 있습니다.'];
+  else if (info.past) msg = ['지난 날짜입니다', '오늘 이후 날짜만 예약할 수 있습니다.'];
+  else if (info.off) msg = ['주말 및 공휴일은 예약불가입니다', info.hol ? `${krDate(ds)}은(는) ${info.hol}입니다.` : `${krDate(ds)}은(는) 주말입니다.`];
+  else if (!isAdmin && !info.inWin) msg = ['한달 단위로 예약 가능합니다.', `현재 ${krDate(ymd(MAX_DAY))}까지 예약할 수 있습니다.`];
+  if (msg) popup({ type:'warn', title:msg[0], msg:msg[1] });
+  return !msg;
+}
+
+async function tryBook(ds){
+  hideBubble();
+  if (!consented){
+    await popup({ type:'warn', title:'개인정보 동의 해주세요', msg:'개인정보 수집 · 이용 동의와 학과 소속 확인 후 예약할 수 있습니다.' });
+    return goTo('#top');
+  }
+  if (!checkDate(ds)) return;
+  curDate = ds; selA = selB = null;
+  $('#fDate').value = ds;
+  $('#fDate').min = ymd(TODAY);
+  if (!isAdmin) $('#fDate').max = ymd(MAX_DAY); else $('#fDate').removeAttribute('max');
+  renderSlots();
+  openModal($('#bookModal'));
+  setTimeout(() => $('#fName').focus(), 60);
+}
+$('#fDate').addEventListener('change', e => {
+  const v = e.target.value;
+  if (!v) return;
+  if (!checkDate(v)){ e.target.value = curDate; return; }
+  curDate = v; selA = selB = null; renderSlots();
+});
+
+// free | busy(승인된 수업·예약) | pend(신청됐으나 승인 전) | past — 반려된 예약은 목록에서 빠지므로 다시 free
+function slotState(ds, h){
+  if (ds === ymd(TODAY) && h <= new Date().getHours()) return 'past';
+  const hit = onDate(ds).filter(r => r.start < h + 1 && r.end > h);
+  if (!hit.length) return 'free';
+  return hit.every(r => r.status === 'pending') ? 'pend' : 'busy';
+}
+const SLOT_NOTE = { busy:'예약됨', pend:'승인대기' };
+function busyMsg(ds, h){
+  const d = parseD(ds);
+  return `${pad(d.getMonth()+1)}월 ${pad(d.getDate())}일 ${pad(h)}시 00분은 예약되어 있습니다`;
+}
+function slotBlockedPopup(ds, h, st, extra){
+  return popup({ type:'warn', title:busyMsg(ds, h),
+    msg: (st === 'pend' ? '다른 신청이 승인대기 중인 시간입니다.\n담당자가 반려하면 다시 예약할 수 있습니다.' : '비어 있는 시간만 예약할 수 있습니다.') + (extra ? '\n' + extra : '') });
+}
+const selRange = () => selA == null ? null : [Math.min(selA, selB ?? selA), Math.max(selA, selB ?? selA) + 1];
+function renderSlots(){
+  const rg = selRange();
+  let html = '';
+  for (let h = OPEN; h < CLOSE; h++){
+    const p = PERIODS.find(x => h === x.s);
+    if (p) html += `<div class="period-lbl"><i style="background:${p.c}"></i>${p.n}</div>`;
+    const st = slotState(curDate, h);
+    const sel = rg && h >= rg[0] && h < rg[1];
+    const edge = sel && (h === rg[0] || h === rg[1] - 1);
+    html += `<button type="button" class="slot ${st} ${sel?'sel':''} ${edge?'edge':''}" data-h="${h}">${hh(h)}<small>${SLOT_NOTE[st] || '~ ' + hh(h+1)}</small></button>`;
+  }
+  $('#slots').innerHTML = html;
+  $('#selText').textContent = rg ? `${hh(rg[0])} – ${hh(rg[1])} (${rg[1]-rg[0]}시간)` : '-';
+}
+$('#slots').addEventListener('click', e => {
+  const b = e.target.closest('.slot'); if (!b) return;
+  const h = +b.dataset.h, st = slotState(curDate, h);
+  if (st === 'busy' || st === 'pend') return slotBlockedPopup(curDate, h, st);
+  if (st === 'past') return popup({ type:'info', title:'이미 지난 시간입니다', msg:'현재 시각 이후로 선택해 주세요.' });
+  if (selA == null || selB != null){ selA = h; selB = null; }
+  else if (h === selA){ selA = null; }
+  else {
+    const lo = Math.min(selA, h), hi = Math.max(selA, h);
+    for (let x = lo; x <= hi; x++){
+      const sx = slotState(curDate, x);
+      if (sx !== 'free'){ selA = null; renderSlots(); return slotBlockedPopup(curDate, x, sx, '선택한 시간 사이에 예약된 시간이 있으니 다시 선택해 주세요.'); }
+    }
+    selB = h;
+  }
+  renderSlots();
+});
+
+$('#bookForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = $('#fName').value.trim(), dept = $('#fDept').value.trim();
+  if (!name) return popup({ type:'info', title:'이름을 입력해 주세요' });
+  if (!dept) return popup({ type:'info', title:'연구실명(부서명)을 입력해 주세요' });
+  if (!checkDate(curDate)) return;
+  const rg = selRange();
+  if (!consented) return popup({ type:'warn', title:'개인정보 동의 해주세요' });
+  if (!rg) return popup({ type:'info', title:'사용 시간을 선택해 주세요', msg:'시작 시간과 마지막 시간을 차례로 눌러 주세요.' });
+  for (let h = rg[0]; h < rg[1]; h++){ const sx = slotState(curDate, h); if (sx !== 'free') return slotBlockedPopup(curDate, h, sx); }
+
+  const btn = $('#submitBtn'); btn.disabled = true; btn.textContent = '저장 중…';
+  let r;
+  try { r = await backend.create({ date:curDate, start:rg[0], end:rg[1], name, dept, pw: isAdmin ? adminPw : undefined }); }
+  catch(err){ r = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
+  btn.disabled = false; btn.textContent = '예약 신청하기';
+  if (!r.ok){ await refresh(); renderSlots(); return errorPopup({ ...r, date:curDate }); }
+
+  const when = `${krDate(curDate)} ${hh(rg[0])} – ${hh(rg[1])}`;
+  closeModal($('#bookModal')); $('#bookForm').reset();
+  await refresh();
+  if (r.status === 'approved') popup({ type:'ok', title:'예약이 등록되었습니다', msg:`${when}\n관리자 등록으로 바로 승인되었습니다.` });
+  else popup({ type:'ok', title:'예약 신청완료, 담당자 승인 필요', msg:`${when}\n담당자가 승인하면 예약이 확정됩니다.` });
+});
+
+/* ================= 관리자 ================= */
+$('#adminBtn').addEventListener('click', () => {
+  if (isAdmin) return goTo('#admin');
+  $('#pw').value = ''; openModal($('#loginModal')); setTimeout(() => $('#pw').focus(), 50);
+});
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = $('#pw').value;
+  let r;
+  try { r = await backend.adminList(pw); } catch(err){ r = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
+  if (!r.ok){ $('#pw').value = ''; return popup({ type:'warn', title: r.code === 'auth' ? '비밀번호가 올바르지 않습니다' : '로그인하지 못했습니다', msg: r.error || '' }); }
+  isAdmin = true; adminPw = pw; ADM = r.items;
+  closeModal($('#loginModal'));
+  applyAdmin(); renderCal(); renderAdmin();
+  goTo('#admin');
+});
+$('#logoutBtn').onclick = () => {
+  isAdmin = false; adminPw = null; ADM = [];
+  applyAdmin(); renderCal(); renderAdmin(); goTo('#top');
+};
+$('#reloadBtn').onclick = refresh;
+
+let admFilter = 'pending';
+$('#admTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  admFilter = b.dataset.f;
+  document.querySelectorAll('#admTabs button').forEach(x => x.classList.toggle('on', x === b));
+  renderAdmin();
+});
+
+function applyAdmin(){
+  $('#adminBtn').classList.toggle('on', isAdmin);
+  $('#adminBtn').title = isAdmin ? '관리자 모드' : '관리자 로그인';
+  $('#admin').hidden = !isAdmin;
+  syncSections();
+  $('#modeNote').textContent = API_URL ? '저장소: Google Sheets (시트에서 상태 열을 직접 바꿔도 반영됩니다)' : '저장소: 이 브라우저 (미리보기 모드 — Google Sheets 미연동)';
+}
+function renderAdmin(){
+  if (!isAdmin){ $('#admBody').innerHTML = ''; return; }
+  $('#pendCount').textContent = `승인대기 ${ADM.filter(r => r.status === 'pending').length}`;
+  let rows = ADM.slice();
+  if (admFilter === 'pending') rows = rows.filter(r => r.status === 'pending');
+  else if (admFilter === 'web') rows = rows.filter(r => r.source === 'web');
+  else if (admFilter === 'approved') rows = rows.filter(r => r.status === 'approved' && r.source === 'web');
+  else if (admFilter === 'rejected') rows = rows.filter(r => r.status === 'rejected');
+  rows.sort((a,b) => a.date.localeCompare(b.date) || a.start - b.start);
+  $('#admBody').innerHTML = rows.length ? rows.map(r => `<tr>
+      <td>${krDate(r.date)}</td><td>${hh(r.start)} – ${hh(r.end)}</td>
+      <td class="t">${esc(r.name)}${r.source==='import' ? ' <span style="color:#9b9da6;font-size:12px">(기존 일정)</span>' : ''}</td>
+      <td>${esc(r.dept) || '-'}</td>
+      <td><span class="st ${r.status}">${ST_TXT[r.status]}</span></td>
+      <td>${esc(String(r.createdAt).slice(0,10))}</td><td>${ymd(expiry(r.createdAt))}</td>
+      <td><div class="acts">
+        ${r.status !== 'approved' ? `<button class="a-ok" data-act="approved" data-id="${esc(r.id)}">승인</button>` : ''}
+        ${r.status !== 'rejected' ? `<button class="a-no" data-act="rejected" data-id="${esc(r.id)}">반려</button>` : ''}
+        <button class="a-del" data-act="del" data-id="${esc(r.id)}">삭제</button></div></td></tr>`).join('')
+    : `<tr><td colspan="8" class="empty">해당하는 예약이 없습니다.</td></tr>`;
+}
+$('#admBody').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const r = ADM.find(x => x.id === b.dataset.id); if (!r) return;
+  let res;
+  try {
+    if (b.dataset.act === 'del'){
+      if (!await popup({ type:'warn', title:'예약을 삭제할까요?', msg:`${krDate(r.date)} ${hh(r.start)} – ${hh(r.end)}\n${r.name}\n삭제하면 되돌릴 수 없습니다.`, ok:'삭제', cancel:'취소' })) return;
+      res = await backend.remove(adminPw, r.id);
+    } else res = await backend.setStatus(adminPw, r.id, b.dataset.act);
+  } catch(err){ res = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
+  if (!res.ok) await errorPopup({ ...res, date:r.date });
+  await refresh();
+});
+$('#csvBtn').onclick = () => {
+  const head = ['사용일','시작','종료','이름/내용','연구실(부서)','상태','구분','신청일시','삭제예정일'];
+  const rows = ADM.slice().sort((a,b) => a.date.localeCompare(b.date) || a.start - b.start)
+    .map(r => [r.date, hh(r.start), hh(r.end), r.name, r.dept, ST_TXT[r.status], r.source==='import'?'기존 일정':'온라인 신청', r.createdAt, ymd(expiry(r.createdAt))]);
+  const csv = '﻿' + [head, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = `세미나실_예약내역_${ymd(new Date())}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* ================= 시작 ================= */
+syncConsentUI();
+refresh();
+</script>
+</body>
+</html>
