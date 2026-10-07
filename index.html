@@ -287,6 +287,8 @@ section.block{padding:96px 0 0}
 .dl-row .a-no,.dl-row .a-del{background:#f1edea;color:var(--ink-2)}
 .btn-cancel{border:1.5px solid #f3c4cf;background:#fff;color:var(--rose-ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800}
 .btn-cancel:hover{background:var(--pink-soft)}
+.pw-form{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.pw-form .btns{margin-top:12px}
 .dl-empty{font-size:13px;color:var(--muted)}
 /* 처리 상태 알림 */
 .toast{position:fixed;left:50%;bottom:28px;z-index:95;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;font-size:14px;font-weight:700;border-radius:999px;padding:12px 20px;box-shadow:0 12px 30px rgba(20,21,25,.25);transition:.2s;max-width:calc(100vw - 32px);text-align:center}
@@ -432,6 +434,7 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
           <h3>관리자 · 예약 관리 <small id="pendCount">승인대기 0</small></h3>
           <div class="admin-actions">
             <button id="reloadBtn">새로고침</button>
+            <button id="pwChangeBtn">비밀번호 변경</button>
             <button id="csvBtn">CSV 내보내기</button>
             <button id="logoutBtn">로그아웃</button>
           </div>
@@ -489,6 +492,21 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
     <form id="cancelForm" style="margin-top:16px">
       <input class="field" type="password" id="cancelPwIn" maxlength="20" placeholder="예약할 때 정한 취소 비밀번호" autocomplete="off">
       <div class="btns"><button type="button" class="btn-ghost" data-close>닫기</button><button type="submit" class="btn-main" id="cancelSubmit">예약 취소</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- 관리자 비밀번호 변경 -->
+<div class="modal" id="pwModal" hidden>
+  <div class="sheet alert">
+    <div class="ic info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+    <h4>관리자 비밀번호 변경</h4>
+    <p>영문 · 숫자 · 특수문자를 모두 넣어 8자 이상으로 정해 주세요.</p>
+    <form id="pwForm" class="pw-form" autocomplete="off">
+      <input class="field" type="password" id="pwCur" placeholder="현재 비밀번호" autocomplete="current-password">
+      <input class="field" type="password" id="pwNew" placeholder="새 비밀번호" autocomplete="new-password">
+      <input class="field" type="password" id="pwNew2" placeholder="새 비밀번호 확인" autocomplete="new-password">
+      <div class="btns"><button type="button" class="btn-ghost" data-close>취소</button><button type="submit" class="btn-main" id="pwSubmit">변경</button></div>
     </form>
   </div>
 </div>
@@ -590,7 +608,8 @@ const Remote = {
   adminList(pw){ return this.post({ action:'adminList', pw }); },
   setStatus(pw, id, status){ return this.post({ action:'setStatus', pw, id, status }); },
   remove(pw, id){ return this.post({ action:'delete', pw, id }); },
-  cancel(id, cancelPw){ return this.post({ action:'cancel', id, cancelPw }); }
+  cancel(id, cancelPw){ return this.post({ action:'cancel', id, cancelPw }); },
+  changePw(pw, newPw){ return this.post({ action:'changePw', pw, newPw }); }
 };
 const Local = {
   KEY:'ai413.reservations.v2',
@@ -622,6 +641,7 @@ const Local = {
     if (r.cancelPw !== cancelPw) return { ok:false, code:'badpw', left:4 };
     this.save(db.filter(x => x !== r)); return { ok:true };
   },
+  async changePw(){ return { ok:false, error:'Google Sheets 연결(API_URL) 후 사용할 수 있습니다.' }; },
   async adminList(pw){
     if (!LOCAL_ADMIN_PW) return { ok:false, error:'Google Sheets 연결(API_URL) 후 관리자 로그인을 사용할 수 있습니다.' };
     return pw === LOCAL_ADMIN_PW ? { ok:true, items:this.load() } : { ok:false, code:'auth' };
@@ -701,6 +721,7 @@ function errorPopup(r){
   if (r.code === 'window') return popup({ type:'warn', title:'한달 단위로 예약 가능합니다.' });
   if (r.code === 'off') return popup({ type:'warn', title:'주말 및 공휴일은 예약불가입니다' });
   if (r.code === 'badpw') return popup({ type:'warn', title:'비밀번호가 일치하지 않습니다', msg: r.left > 0 ? `남은 시도 ${r.left}회` : '시도 횟수를 모두 사용했습니다. 30분 뒤 다시 시도해 주세요.' });
+  if (r.code === 'adminLocked') return popup({ type:'warn', title:'관리자 로그인이 잠시 잠겼습니다', msg:'비밀번호를 10번 틀려 10분간 잠겼습니다.\n10분 뒤 다시 시도해 주세요.' });
   if (r.code === 'locked') return popup({ type:'warn', title:'잠시 취소할 수 없습니다', msg:'비밀번호를 5번 틀려 30분간 잠겼습니다.\n급하면 관리자에게 문의하세요. (02-970-9726)' });
   if (r.code === 'auth') return popup({ type:'warn', title:'관리자 인증이 필요합니다', msg:'다시 로그인해 주세요.' });
   return popup({ type:'warn', title:'처리하지 못했습니다', msg: r.error || '' });
@@ -1017,7 +1038,11 @@ $('#loginForm').addEventListener('submit', async e => {
   const pw = $('#pw').value;
   let r;
   try { r = await backend.adminList(pw); } catch(err){ r = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
-  if (!r.ok){ $('#pw').value = ''; return popup({ type:'warn', title: r.code === 'auth' ? '비밀번호가 올바르지 않습니다' : '로그인하지 못했습니다', msg: r.error || '' }); }
+  if (!r.ok){
+    $('#pw').value = '';
+    if (r.code === 'adminLocked') return popup({ type:'warn', title:'관리자 로그인이 잠시 잠겼습니다', msg:'비밀번호를 10번 틀려 10분간 잠겼습니다.\n10분 뒤 다시 시도해 주세요.' });
+    return popup({ type:'warn', title: r.code === 'auth' ? '비밀번호가 올바르지 않습니다' : '로그인하지 못했습니다', msg: r.error || '' });
+  }
   isAdmin = true; adminPw = pw; ADM = r.items;
   closeModal($('#loginModal'));
   applyAdmin(); renderCal(); renderAdmin();
@@ -1028,6 +1053,32 @@ $('#logoutBtn').onclick = () => {
   applyAdmin(); renderCal(); renderAdmin(); goTo('#top');
 };
 $('#reloadBtn').onclick = refresh;
+
+/* 관리자 비밀번호 변경 — 새 비밀번호는 Google 서버에 암호화되어 저장 */
+$('#pwChangeBtn').onclick = () => {
+  ['#pwCur', '#pwNew', '#pwNew2'].forEach(s => $(s).value = '');
+  openModal($('#pwModal')); setTimeout(() => $('#pwCur').focus(), 50);
+};
+$('#pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cur = $('#pwCur').value, nw = $('#pwNew').value, nw2 = $('#pwNew2').value;
+  if (!cur) return popup({ type:'info', title:'현재 비밀번호를 입력해 주세요' });
+  if (nw.length < 8) return popup({ type:'info', title:'새 비밀번호는 8자 이상이어야 합니다' });
+  if (!/[A-Za-z]/.test(nw) || !/[0-9]/.test(nw) || !/[^A-Za-z0-9]/.test(nw)) return popup({ type:'info', title:'영문, 숫자, 특수문자를 모두 넣어 주세요' });
+  if (nw !== nw2) return popup({ type:'info', title:'새 비밀번호가 서로 다릅니다', msg:'새 비밀번호 확인 칸을 다시 입력해 주세요.' });
+  if (nw === cur) return popup({ type:'info', title:'현재 비밀번호와 다른 비밀번호를 입력해 주세요' });
+  const btn = $('#pwSubmit'); btn.disabled = true; btn.textContent = '변경 중…';
+  let r;
+  try { r = await backend.changePw(cur, nw); } catch(err){ r = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
+  btn.disabled = false; btn.textContent = '변경';
+  if (!r.ok){
+    if (r.code === 'auth') return popup({ type:'warn', title:'현재 비밀번호가 올바르지 않습니다' });
+    return errorPopup(r);
+  }
+  adminPw = nw;                       // 지금 로그인 상태는 그대로 유지
+  closeModal($('#pwModal'));
+  popup({ type:'ok', title:'비밀번호를 변경했습니다', msg:'다음 로그인부터 새 비밀번호를 사용하세요.', note:'새 비밀번호를 잊지 않도록 따로 기록해 두세요.' });
+});
 
 let admFilter = 'pending';
 $('#admTabs').addEventListener('click', e => {
