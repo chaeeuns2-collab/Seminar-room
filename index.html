@@ -753,7 +753,7 @@ document.querySelectorAll('input[name=cancelOk]').forEach(r => r.addEventListene
   if (r.value === 'y'){ $('#affBox').classList.remove('lock'); return; }
   consented = false; syncConsentUI();
   $('#affBox').classList.add('lock'); resetFrom(['aff']);
-  await popup({ type:'warn', title:'예약이 불가합니다', msg:'수업의 보강, 시험, 학과 회의로 예약이 취소될 수 있다는\n안내에 동의해야 예약할 수 있습니다.' });
+  await popup({ type:'warn', title:'예약이 불가합니다', msg:'수업의 보강, 시험, 학과 회의로\n예약이 취소될 수 있습니다.\n이 안내에 동의해야 예약할 수 있습니다.' });
 }));
 document.querySelectorAll('input[name=aff]').forEach(r => r.addEventListener('change', async () => {
   if (!checked('agree') || !checked('cancelOk')){
