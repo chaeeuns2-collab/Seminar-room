@@ -60,8 +60,8 @@ input{font:inherit}
 @media (max-width:760px){.nav{margin:12px 12px 0}.nav-links{display:none}.nav-right{margin-left:auto}.nav .pill-dark{display:none}}
 
 .hero{position:relative;z-index:1;text-align:center;padding:52px 20px 0}
-.badge{display:inline-flex;align-items:center;gap:8px;background:#f1edea;border-radius:999px;padding:5px 14px 5px 5px;font-size:13px;font-weight:500;color:var(--ink-2)}
-.badge i{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c9eef4,#ffd3df);display:grid;place-items:center;font-style:normal;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:10px;background:#f1edea;border-radius:999px;padding:6px 20px 6px 8px;font-size:17px;font-weight:700;color:var(--ink-2);letter-spacing:-.02em}
+.badge img{width:34px;height:34px;object-fit:contain;border-radius:50%;background:#fff;padding:2px}
 .hero h1{font-size:clamp(34px,5.6vw,62px);line-height:1.16;letter-spacing:-.05em;font-weight:800;margin:20px 0 0;color:var(--ink)}
 .cta-row{position:relative;display:inline-block;margin-top:38px}
 .cta{display:inline-flex;align-items:center;gap:18px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:9px 9px 9px 32px;font-size:18px;font-weight:700;box-shadow:0 12px 30px rgba(20,21,25,.22);transition:transform .2s,box-shadow .2s}
@@ -70,7 +70,7 @@ input{font:inherit}
 .cta:hover .arr{transform:translateX(3px)}
 .click-note{position:absolute;left:calc(100% + 6px);top:2px;display:flex;align-items:flex-start;pointer-events:none}
 .click-note span{font-family:Caveat,cursive;font-size:30px;font-weight:700;color:var(--ink);transform:rotate(-10deg);margin:20px 0 0 -4px}
-@media (max-width:620px){.click-note{left:calc(100% - 14px);top:-30px;align-items:center}.click-note svg{width:34px;height:22px;transform:rotate(28deg)}.click-note span{margin:0 0 0 -2px;font-size:24px}}
+@media (max-width:620px){.click-note{left:calc(100% - 22px);top:-46px;align-items:flex-start}.click-note svg{width:40px;height:26px;transform:rotate(-38deg);transform-origin:100% 50%;margin-top:14px}.click-note span{margin:0 0 0 -4px;font-size:24px;transform:rotate(-8deg)}}
 .proof{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;font-size:13px;color:var(--muted)}
 .avs{display:flex}
 .avs b{width:28px;height:28px;border-radius:50%;border:2px solid #fff;margin-left:-8px;display:grid;place-items:center;font-size:11px;color:#fff}
@@ -112,6 +112,8 @@ section.block{padding:96px 0 0}
 .choice label:has(input:checked){border-color:var(--rose);background:var(--pink-soft)}
 .aff-box{margin-top:22px;padding-top:22px;border-top:1px dashed var(--line);transition:opacity .2s}
 .aff-box.lock{opacity:.4}
+.aff-note.cancel-note{background:var(--pink-soft);color:var(--rose-ink);font-weight:700}
+.alert .pop-note{margin-top:10px;color:var(--red);font-weight:800;font-size:15px}
 .aff-note{margin:0 0 12px;font-size:15px;line-height:1.65;color:var(--ink-2);background:var(--aqua-soft);border-radius:14px;padding:14px 16px}
 .done{display:flex;align-items:center;gap:12px;margin-top:22px;padding:14px 16px;border-radius:14px;background:#effaf4;color:#1b7a4b;font-weight:700;font-size:15px}
 .done button{margin-left:auto}
@@ -207,6 +209,8 @@ section.block{padding:96px 0 0}
 .field:focus{border-color:var(--pink);box-shadow:0 0 0 4px var(--pink-soft)}
 .row2{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-bottom:16px}
 @media (max-width:600px){.row2{grid-template-columns:1fr}}
+.pw-row{margin:-4px 0 16px}
+.pw-row small{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 .slots-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
 .slots-h small{color:var(--muted);font-size:12px}
 .slots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
@@ -281,6 +285,8 @@ section.block{padding:96px 0 0}
 .dl-row .acts{display:flex;gap:6px}
 .dl-row .acts button{border:0;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:800}
 .dl-row .a-no,.dl-row .a-del{background:#f1edea;color:var(--ink-2)}
+.btn-cancel{border:1.5px solid #f3c4cf;background:#fff;color:var(--rose-ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800}
+.btn-cancel:hover{background:var(--pink-soft)}
 .dl-empty{font-size:13px;color:var(--muted)}
 /* 처리 상태 알림 */
 .toast{position:fixed;left:50%;bottom:28px;z-index:95;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;font-size:14px;font-weight:700;border-radius:999px;padding:12px 20px;box-shadow:0 12px 30px rgba(20,21,25,.25);transition:.2s;max-width:calc(100vw - 32px);text-align:center}
@@ -317,7 +323,7 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
       </header>
 
       <div class="hero">
-        <span class="badge"><i>🌊</i>상상관 4층 · 413호</span>
+        <span class="badge"><img id="badgeMascot" alt=""><span>상상관 413호</span></span>
         <h1>인공지능응용학과<br>세미나실 예약</h1>
 
         <div class="cta-row">
@@ -359,15 +365,24 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
           <tr><th>수집 항목</th><td>이름, 연구실명(부서명)</td></tr>
           <tr><th>수집 목적</th><td>세미나실 대여 관리</td></tr>
           <tr><th>보유 기간</th><td><b>6개월</b><br><span style="color:var(--muted);font-size:13px">입력한 날로부터 6개월이 지나면 해당 데이터는 삭제됩니다.</span></td></tr>
+          <tr><th>표시 범위</th><td>예약 현황에는 <b>연구실명(부서명)</b>만 표시되며, 이름은 관리자만 볼 수 있습니다.</td></tr>
         </table>
-        <p class="warn-red">※ 위의 개인정보 수집‧이용에 대한 동의를 거부할 권리가 있습니다.<br>그러나 동의를 거부할 경우 세미나실 대여가 불가합니다.</p>
+        <p class="warn-red">※ 위의 개인정보 수집‧이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 세미나실 대여가 불가합니다.</p>
         <p class="qtitle">개인정보 수집 · 이용에 동의하십니까?</p>
         <div class="choice">
           <label><input type="radio" name="agree" value="y"> 동의합니다</label>
           <label><input type="radio" name="agree" value="n"> 동의하지 않습니다</label>
         </div>
+        <div class="aff-box lock" id="cancelBox">
+          <p class="aff-note cancel-note">수업의 보강, 시험, 학과 회의로 예약이 취소될 수 있습니다.</p>
+          <p class="qtitle">위 내용에 동의하십니까?</p>
+          <div class="choice">
+            <label><input type="radio" name="cancelOk" value="y"> 동의합니다</label>
+            <label><input type="radio" name="cancelOk" value="n"> 동의하지 않습니다</label>
+          </div>
+        </div>
         <div class="aff-box lock" id="affBox">
-          <p class="aff-note">인공지능응용학과 학생, 교수님만 예약 가능합니다.<br>인공지능응용학과 소속이 아닐 경우 예약이 거부됩니다.</p>
+          <p class="aff-note">인공지능응용학과 학생, 교수님만 예약 가능합니다.<br>인공지능응용학과 소속이 아닐 경우 예약이 반려될 수 있습니다.</p>
           <div class="choice">
             <label><input type="radio" name="aff" value="y"> 인공지능응용학과 소속입니다</label>
             <label><input type="radio" name="aff" value="n"> 소속이 아닙니다</label>
@@ -452,6 +467,8 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
           <div><label class="lbl" for="fName">이름</label><input class="field" id="fName" maxlength="20" placeholder="홍길동"></div>
           <div><label class="lbl" for="fDept">연구실명(부서명)</label><input class="field" id="fDept" maxlength="40" placeholder="인공지능응용 연구실"></div>
         </div>
+        <div class="pw-row" id="pwRow"><label class="lbl" for="fCancelPw">취소 비밀번호</label><input class="field" type="password" id="fCancelPw" maxlength="20" autocomplete="new-password" placeholder="4자리 이상 (예약을 직접 취소할 때 사용)">
+          <small>예약을 직접 취소할 때 필요합니다. 암호화되어 저장되며 관리자도 볼 수 없으니 꼭 기억해 주세요.</small></div>
         <div id="dayList" class="daylist"></div>
         <div class="slots-h"><span class="lbl" style="margin:0">사용 시간</span><small>1시간 단위 · 원하는 빈 시간을 이어서 눌러 주세요 (몇 시간이든 가능)</small></div>
         <div class="slot-legend"><span><i class="k-free"></i>예약 가능</span><span><i class="k-pend"></i>승인대기</span><span><i class="k-busy"></i>예약됨</span></div>
@@ -460,6 +477,19 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
         <button class="btn-main" type="submit" id="submitBtn">예약 신청하기</button>
       </form>
     </div>
+  </div>
+</div>
+
+<!-- 본인 예약 취소 -->
+<div class="modal" id="cancelModal" hidden>
+  <div class="sheet alert">
+    <div class="ic warn">!</div>
+    <h4>예약 취소</h4>
+    <p id="cancelInfo"></p>
+    <form id="cancelForm" style="margin-top:16px">
+      <input class="field" type="password" id="cancelPwIn" maxlength="20" placeholder="예약할 때 정한 취소 비밀번호" autocomplete="off">
+      <div class="btns"><button type="button" class="btn-ghost" data-close>닫기</button><button type="submit" class="btn-main" id="cancelSubmit">예약 취소</button></div>
+    </form>
   </div>
 </div>
 
@@ -484,6 +514,7 @@ footer .copy{margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line
     <div class="ic" id="aIc"></div>
     <h4 id="aTitle"></h4>
     <p id="aMsg"></p>
+    <p id="aNote" class="pop-note" hidden></p>
     <div class="btns" id="aBtns"></div>
   </div>
 </div>
@@ -519,6 +550,8 @@ const MIN_MONTH = new Date(2026, 9, 1);   // 2026년 10월부터 조회
 const RETENTION_MONTHS = 6;
 const DOW = ['일','월','화','수','목','금','토'];
 const ST_TXT = { pending:'승인대기', approved:'승인', rejected:'반려' };
+// 일반 사용자 화면 표시: 수업은 '수업', 예약은 '예약(연구실명)' — 이름은 표시하지 않음
+const publicLabel = r => r.type === 'class' ? '수업' : (r.dept ? `예약(${esc(r.dept)})` : '예약');
 
 /* ================= 유틸 ================= */
 const $ = s => document.querySelector(s);
@@ -556,7 +589,8 @@ const Remote = {
   create(p){ return this.post({ action:'create', ...p }); },
   adminList(pw){ return this.post({ action:'adminList', pw }); },
   setStatus(pw, id, status){ return this.post({ action:'setStatus', pw, id, status }); },
-  remove(pw, id){ return this.post({ action:'delete', pw, id }); }
+  remove(pw, id){ return this.post({ action:'delete', pw, id }); },
+  cancel(id, cancelPw){ return this.post({ action:'cancel', id, cancelPw }); }
 };
 const Local = {
   KEY:'ai413.reservations.v2',
@@ -570,7 +604,7 @@ const Local = {
     this.save(db); return db;
   },
   save(db){ try { localStorage.setItem(this.KEY, JSON.stringify(db)); } catch(e){} },
-  async list(){ return { ok:true, items: this.load().filter(r => r.status !== 'rejected').map(({date,start,end,type,status}) => ({date,start,end,type,status})) }; },
+  async list(){ return { ok:true, items: this.load().filter(r => r.status !== 'rejected').map(({id,date,start,end,type,status,dept,cancelPw}) => ({date,start,end,type,status,dept: type === 'reserve' ? dept : '', id: cancelPw ? id : '', cancellable: !!cancelPw})) }; },
   async create(p){
     const db = this.load(), admin = !!LOCAL_ADMIN_PW && p.pw === LOCAL_ADMIN_PW;
     const info = dayInfo(p.date);
@@ -578,9 +612,15 @@ const Local = {
     if (!admin && !info.inWin) return { ok:false, code:'window' };
     const c = overlaps(db, p.date, p.start, p.end);
     if (c) return { ok:false, code:'busy', at: Math.max(c.start, p.start) };
-    db.push({ id:'w'+Date.now().toString(36), date:p.date, start:p.start, end:p.end, name:p.name, dept:p.dept,
+    db.push({ id:'w'+Date.now().toString(36), date:p.date, start:p.start, end:p.end, name:p.name, dept:p.dept, cancelPw:p.cancelPw || '',
               type:'reserve', status: admin ? 'approved' : 'pending', source:'web', createdAt:new Date().toISOString() });
     this.save(db); return { ok:true, status: admin ? 'approved' : 'pending' };
+  },
+  async cancel(id, cancelPw){
+    const db = this.load(), r = db.find(x => x.id === id);
+    if (!r || !r.cancelPw) return { ok:false, error:'직접 취소할 수 없는 예약입니다.' };
+    if (r.cancelPw !== cancelPw) return { ok:false, code:'badpw', left:4 };
+    this.save(db.filter(x => x !== r)); return { ok:true };
   },
   async adminList(pw){
     if (!LOCAL_ADMIN_PW) return { ok:false, error:'Google Sheets 연결(API_URL) 후 관리자 로그인을 사용할 수 있습니다.' };
@@ -643,11 +683,12 @@ document.addEventListener('keydown', e => {
   const open = [...document.querySelectorAll('.modal')].filter(m => !m.hidden).pop();
   if (open && open.id !== 'alertModal') closeModal(open);
 });
-function popup({ type='info', title, msg='', ok='확인', cancel }){
+function popup({ type='info', title, msg='', note='', ok='확인', cancel }){
   return new Promise(res => {
     const icons = { ok:'✓', warn:'!', info:'i' };
     $('#aIc').className = 'ic ' + type; $('#aIc').textContent = icons[type];
     $('#aTitle').textContent = title; $('#aMsg').textContent = msg;
+    $('#aNote').textContent = note; $('#aNote').hidden = !note;
     const btns = $('#aBtns'); btns.innerHTML = '';
     if (cancel){ const b = document.createElement('button'); b.className = 'btn-ghost'; b.textContent = cancel; b.onclick = () => { closeModal($('#alertModal')); res(false); }; btns.append(b); }
     const b = document.createElement('button'); b.className = 'btn-main'; b.textContent = ok;
@@ -659,6 +700,8 @@ function errorPopup(r){
   if (r.code === 'busy') return popup({ type:'warn', title: busyMsg(r.date, r.at), msg:'비어 있는 시간만 예약할 수 있습니다.' });
   if (r.code === 'window') return popup({ type:'warn', title:'한달 단위로 예약 가능합니다.' });
   if (r.code === 'off') return popup({ type:'warn', title:'주말 및 공휴일은 예약불가입니다' });
+  if (r.code === 'badpw') return popup({ type:'warn', title:'비밀번호가 일치하지 않습니다', msg: r.left > 0 ? `남은 시도 ${r.left}회` : '시도 횟수를 모두 사용했습니다. 30분 뒤 다시 시도해 주세요.' });
+  if (r.code === 'locked') return popup({ type:'warn', title:'잠시 취소할 수 없습니다', msg:'비밀번호를 5번 틀려 30분간 잠겼습니다.\n급하면 관리자에게 문의하세요. (02-970-9726)' });
   if (r.code === 'auth') return popup({ type:'warn', title:'관리자 인증이 필요합니다', msg:'다시 로그인해 주세요.' });
   return popup({ type:'warn', title:'처리하지 못했습니다', msg: r.error || '' });
 }
@@ -692,18 +735,30 @@ function syncConsentUI(){
   $('#doneBox').hidden = !consented;
   syncSections();
 }
+// 순서: ① 개인정보 동의 → ② 예약 취소 가능 안내 동의 → ③ 학과 소속 확인
+const checked = name => document.querySelector(`input[name=${name}]:checked`)?.value === 'y';
+function resetFrom(names){ names.forEach(n => document.querySelectorAll(`input[name=${n}]`).forEach(i => i.checked = false)); }
 document.querySelectorAll('input[name=agree]').forEach(r => r.addEventListener('change', async () => {
-  if (r.value === 'y'){ $('#affBox').classList.remove('lock'); return; }
+  if (r.value === 'y'){ $('#cancelBox').classList.remove('lock'); return; }
   consented = false; syncConsentUI();
-  $('#affBox').classList.add('lock');
-  document.querySelectorAll('input[name=aff]').forEach(i => i.checked = false);
+  $('#cancelBox').classList.add('lock'); $('#affBox').classList.add('lock');
+  resetFrom(['cancelOk', 'aff']);
   await popup({ type:'warn', title:'세미나실 대여가 불가합니다', msg:'개인정보 수집‧이용에 동의하지 않으면\n세미나실 대여가 불가합니다.' });
 }));
-document.querySelectorAll('input[name=aff]').forEach(r => r.addEventListener('change', async () => {
-  const agreed = document.querySelector('input[name=agree]:checked')?.value === 'y';
-  if (!agreed){
+document.querySelectorAll('input[name=cancelOk]').forEach(r => r.addEventListener('change', async () => {
+  if (!checked('agree')){
     r.checked = false;
     return popup({ type:'warn', title:'개인정보 동의 해주세요', msg:'동의하지 않으면 세미나실 대여가 불가합니다.' });
+  }
+  if (r.value === 'y'){ $('#affBox').classList.remove('lock'); return; }
+  consented = false; syncConsentUI();
+  $('#affBox').classList.add('lock'); resetFrom(['aff']);
+  await popup({ type:'warn', title:'예약이 불가합니다', msg:'수업의 보강, 시험, 학과 회의로 예약이 취소될 수 있다는\n안내에 동의해야 예약할 수 있습니다.' });
+}));
+document.querySelectorAll('input[name=aff]').forEach(r => r.addEventListener('change', async () => {
+  if (!checked('agree') || !checked('cancelOk')){
+    r.checked = false;
+    return popup({ type:'warn', title: checked('agree') ? '예약 취소 안내에 동의해 주세요' : '개인정보 동의 해주세요', msg:'동의하지 않으면 세미나실 대여가 불가합니다.' });
   }
   if (r.value === 'n'){
     consented = false; syncConsentUI();
@@ -796,7 +851,7 @@ function showBubble(anchor, ds, pk){
     const st = r.status === 'pending' ? '<span class="st pending">승인대기</span>' : '';
     const label = isAdmin
       ? `${esc(r.name)}${st}<small>${esc(r.dept)}</small>`
-      : `${r.type === 'class' ? '수업' : '예약'}${st}`;
+      : `${publicLabel(r)}${st}`;
     return `<li><i style="background:${dot}"></i><div><b>${hh(r.start)} – ${hh(r.end)}</b>${label}</div></li>`;
   }).join('');
   const info = dayInfo(ds);
@@ -846,6 +901,7 @@ async function tryBook(ds){
   $('#fDate').min = ymd(TODAY);
   if (!isAdmin) $('#fDate').max = ymd(MAX_DAY); else $('#fDate').removeAttribute('max');
   renderSlots();
+  $('#fCancelPw').placeholder = isAdmin ? '(선택) 4자리 이상' : '4자리 이상 (예약을 직접 취소할 때 사용)';
   openModal($('#bookModal'));
   if (!isAdmin) setTimeout(() => $('#fName').focus(), 60);
 }
@@ -856,9 +912,9 @@ function renderDayList(){
   $('#dayList').innerHTML = `<div class="dl-h">${krDate(curDate)} 예약 현황</div>` + (list.length ? list.map(r => `
     <div class="dl-row ${r.status}">
       <b>${hh(r.start)} – ${hh(r.end)}</b>
-      <span class="dl-who">${isAdmin ? esc(r.name) + (r.dept ? ` <small>${esc(r.dept)}</small>` : '') : (r.type === 'class' ? '수업' : '예약')}</span>
+      <span class="dl-who">${isAdmin ? esc(r.name) + (r.dept ? ` <small>${esc(r.dept)}</small>` : '') : publicLabel(r)}</span>
       <span class="st ${r.status}">${ST_TXT[r.status]}</span>
-      ${isAdmin ? actButtons(r) : ''}
+      ${isAdmin ? actButtons(r) : r.cancellable ? `<button type="button" class="btn-cancel" data-cancel="${esc(r.id)}">예약 취소</button>` : ''}
     </div>`).join('') : '<div class="dl-empty">예약이 없습니다. 원하는 시간을 골라 신청하세요.</div>');
 }
 $('#fDate').addEventListener('change', e => {
@@ -926,9 +982,11 @@ $('#slots').addEventListener('click', e => {
 
 $('#bookForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const name = $('#fName').value.trim(), dept = $('#fDept').value.trim();
+  const name = $('#fName').value.trim(), dept = $('#fDept').value.trim(), cancelPw = $('#fCancelPw').value;
   if (!name) return popup({ type:'info', title:'이름을 입력해 주세요' });
   if (!dept) return popup({ type:'info', title:'연구실명(부서명)을 입력해 주세요' });
+  if (!isAdmin && cancelPw.length < 4) return popup({ type:'info', title:'취소 비밀번호를 4자리 이상 입력해 주세요', msg:'예약을 직접 취소할 때 사용합니다.' });
+  if (isAdmin && cancelPw && cancelPw.length < 4) return popup({ type:'info', title:'취소 비밀번호는 4자리 이상이어야 합니다' });
   if (!checkDate(curDate)) return;
   const rg = selRange();
   if (!consented) return popup({ type:'warn', title:'개인정보 동의 해주세요' });
@@ -937,7 +995,7 @@ $('#bookForm').addEventListener('submit', async e => {
 
   const btn = $('#submitBtn'); btn.disabled = true; btn.textContent = '저장 중…';
   let r;
-  try { r = await backend.create({ date:curDate, start:rg[0], end:rg[1], name, dept, pw: isAdmin ? adminPw : undefined }); }
+  try { r = await backend.create({ date:curDate, start:rg[0], end:rg[1], name, dept, cancelPw, pw: isAdmin ? adminPw : undefined }); }
   catch(err){ r = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
   btn.disabled = false; btn.textContent = '예약 신청하기';
   if (!r.ok){ await refresh(); renderSlots(); return errorPopup({ ...r, date:curDate }); }
@@ -946,7 +1004,7 @@ $('#bookForm').addEventListener('submit', async e => {
   closeModal($('#bookModal')); $('#bookForm').reset();
   await refresh();
   if (r.status === 'approved') popup({ type:'ok', title:'예약이 등록되었습니다', msg:`${when}\n관리자 등록으로 바로 승인되었습니다.` });
-  else popup({ type:'ok', title:'예약 신청완료, 담당자 승인 필요', msg:`${when}\n담당자가 승인하면 예약이 확정됩니다.` });
+  else popup({ type:'ok', title:'예약 신청완료, 담당자 승인 필요', msg:when, note:'담당자 승인 후 이용해주세요.' });
 });
 
 /* ================= 관리자 ================= */
@@ -1054,7 +1112,32 @@ $('#csvBtn').onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
 
+/* ================= 본인 예약 취소 ================= */
+let cancelId = null;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-cancel]'); if (!b) return;
+  const r = PUB.find(x => x.id === b.dataset.cancel); if (!r) return;
+  cancelId = r.id;
+  $('#cancelInfo').textContent = `${krDate(r.date)} ${hh(r.start)} – ${hh(r.end)}\n${r.dept ? `예약(${r.dept})` : '예약'}`;
+  $('#cancelPwIn').value = '';
+  openModal($('#cancelModal')); setTimeout(() => $('#cancelPwIn').focus(), 50);
+});
+$('#cancelForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = $('#cancelPwIn').value;
+  if (!pw) return popup({ type:'info', title:'취소 비밀번호를 입력해 주세요' });
+  const btn = $('#cancelSubmit'); btn.disabled = true; btn.textContent = '처리 중…';
+  let res;
+  try { res = await backend.cancel(cancelId, pw); } catch(err){ res = { ok:false, error:'서버에 연결할 수 없습니다.' }; }
+  btn.disabled = false; btn.textContent = '예약 취소';
+  if (!res.ok){ $('#cancelPwIn').value = ''; return errorPopup(res); }
+  closeModal($('#cancelModal'));
+  await refresh();
+  popup({ type:'ok', title:'예약이 취소되었습니다', msg:'입력하신 개인정보도 함께 삭제되었습니다.' });
+});
+
 /* ================= 시작 ================= */
+$('#badgeMascot').src = MASCOT_SRC;
 syncConsentUI();
 refresh();
 </script>
