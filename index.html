@@ -149,6 +149,7 @@ section.block{padding:96px 0 0}
 .tag{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag.off{background:#f3eeeb;color:#9a8f89}
 .tag.open{background:var(--aqua-soft);color:var(--sea)}
+.tag.admin{background:var(--pink-soft);color:var(--rose-ink)}
 .holname{font-size:11px;color:var(--rose);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .day.off{background:repeating-linear-gradient(135deg,#fbf8f6 0 6px,#f6f1ee 6px 12px)}
 .day.past{opacity:.55}
@@ -587,7 +588,8 @@ const MAX_DAY = new Date(TODAY.getFullYear(), TODAY.getMonth()+1, TODAY.getDate(
 function expiry(createdAt){ const d = new Date(createdAt); d.setMonth(d.getMonth()+RETENTION_MONTHS); return d; }
 function dayInfo(ds){
   const d = parseD(ds), dow = d.getDay(), hol = HOLIDAYS[ds];
-  return { d, dow, hol, off: dow===0 || dow===6 || !!hol, past: d < TODAY, inWin: d >= TODAY && d <= MAX_DAY };
+  const weekend = dow===0 || dow===6;
+  return { d, dow, hol, weekend, off: !!hol || (weekend && !isAdmin), past: d < TODAY, inWin: d >= TODAY && d <= MAX_DAY };
 }
 const overlaps = (list, date, s, e, skipId) => list.find(r => r.id !== skipId && r.status !== 'rejected' && r.date === date && r.start < e && r.end > s);
 
@@ -799,7 +801,7 @@ function renderCal(){
   $('#mTitle').textContent = `${y}년 ${m+1}월`;
   $('#prevM').disabled = view <= MIN_MONTH;
   $('#winNote').innerHTML = `예약 가능 기간: <b>${krDate(ymd(TODAY))} ~ ${krDate(ymd(MAX_DAY))}</b> · 한 달 단위로 예약할 수 있어요.` +
-    (isAdmin ? ' <b style="color:var(--rose)">(관리자: 기간 제한 없이 등록 · 즉시 승인)</b>' : '');
+    (isAdmin ? ' <b style="color:var(--rose)">(관리자: 주말 · 기간 제한 없이 등록, 즉시 승인)</b>' : '');
 
   let html = DOW.map((d,i) => `<div class="dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
   const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
@@ -813,6 +815,7 @@ function renderCal(){
                  ds===ymd(TODAY)?'today':'', info.inWin && !info.off ? 'inwin':''].join(' ');
     let tag = '';
     if (info.off) tag = '<span class="tag off">예약불가</span>';
+    else if (info.weekend && !info.past) tag = '<span class="tag admin">관리자</span>';
     else if (info.inWin && ds !== ymd(TODAY)) tag = '<span class="tag open">예약가능</span>';
     const bars = PERIODS.map(p => {
       const hit = list.filter(r => r.start < p.e && r.end > p.s);
